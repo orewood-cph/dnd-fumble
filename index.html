@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D&D Fumble</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #10151b;
+  --panel: #1a222b;
+  --line: #34404b;
+  --text: #f2eee5;
+  --muted: #b6bec6;
+  --gold: #e9bc72;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 17px/1.55 system-ui, sans-serif;
+}
+main {
+  max-width: 1080px;
+  margin: auto;
+  padding: 30px 18px 60px;
+}
+header {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+}
+.eyebrow {
+  color: var(--gold);
+  letter-spacing: .15em;
+  font-size: 12px;
+}
+h1 {
+  font: 700 clamp(34px, 6vw, 60px)/1.1 Georgia, serif;
+  margin: 14px 0;
+}
+h2 { font-family: Georgia, serif; }
+p { color: var(--muted); }
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 24px 0 18px;
+}
+button, input, select {
+  font: inherit;
+  color: var(--text);
+  background: #101820;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 12px;
+  min-height: 48px;
+  width: 100%;
+}
+button {
+  cursor: pointer;
+  font-weight: 650;
+}
+button:hover { border-color: var(--gold); }
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+.tabs button[aria-pressed="true"], .primary {
+  background: var(--gold);
+  color: #201b13;
+}
+label {
+  display: block;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.options {
+  max-width: 480px;
+  margin-bottom: 20px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 20px;
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 22px;
+}
+.inputs, .secondary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+input { font-size: 24px; }
+.buttons {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.help {
+  font-size: 13px;
+  color: var(--muted);
+}
+.context {
+  color: var(--gold);
+  font-size: 14px;
+}
+.result {
+  min-height: 280px;
+  border-top: 3px solid var(--gold);
+}
+.result h2 {
+  font-size: 32px;
+  margin: 12px 0;
+}
+.result .effect {
+  color: var(--text);
+  font-size: 19px;
+}
+.badge {
+  display: inline-block;
+  color: var(--gold);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 13px;
+  margin: 0 5px 8px 0;
+}
+.flavor {
+  font-style: italic;
+  border-left: 2px solid var(--gold);
+  padding-left: 12px;
+}
+.error {
+  min-height: 24px;
+  color: #ffaaaa;
+  font-size: 14px;
+}
+details {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 15px 18px;
+  margin-top: 14px;
+}
+summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 15px;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 7px;
+}
+th { color: var(--muted); }
+td:first-child {
+  white-space: nowrap;
+  width: 75px;
+  color: var(--gold);
+}
+td strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.selected { background: #34402f; }
+.tablelist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding-left: 26px;
+}
+a { color: var(--gold); }
+[hidden] { display: none !important; }
+@media (max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  .tablelist { grid-template-columns: 1fr; }
+  .panel { padding: 18px; }
+  .tabs button { padding: 10px 5px; font-size: 15px; }
+  td, th { padding: 10px 5px; }
+}
+</style>
+</head>
+
+<body>
+<main>
+  <header>
+    <div class="eyebrow">D&D 2014 · DANSK HOMEBREW</div>
+    <h1>Når terningen svigter.</h1>
+    <p>
+      Vælg kategori. Slå <strong>1d8</strong> for tabellen
+      og <strong>1d100</strong> for uheldet.
+    </p>
+    <div class="context">3 kategorier · 24 tabeller · 240 udfald</div>
+  </header>
+
+  <div class="tabs" role="group" aria-label="Kategori">
+    <button type="button" data-category="weapon" aria-pressed="true">
+      Våben
+    </button>
+    <button type="button" data-category="magic" aria-pressed="false">
+      Magi
+    </button>
+    <button type="button" data-category="save" aria-pressed="false">
+      Saving throw
+    </button>
+  </div>
+
+  <div class="options">
+    <div id="weaponOptions">
+      <label for="weaponType">Angrebstype</label>
+      <select id="weaponType">
+        <option value="melee">Nærkampsvåben</option>
+        <option value="ranged">Afstandsvåben / kastevåben</option>
+        <option value="unarmed">Ubevæbnet / naturlige våben</option>
+      </select>
+    </div>
+
+    <div id="magicOptions" hidden>
+      <label for="damageType">Magisk skadetype</label>
+      <select id="damageType">
+        <option value="force">Force — eller vælg spellens type</option>
+        <option>acid</option>
+        <option>cold</option>
+        <option>fire</option>
+        <option>lightning</option>
+        <option>necrotic</option>
+        <option>poison</option>
+        <option>psychic</option>
+        <option>radiant</option>
+        <option>thunder</option>
+        <option>bludgeoning</option>
+        <option>piercing</option>
+        <option>slashing</option>
+      </select>
+    </div>
+
+    <div id="saveOptions" hidden>
+      <label for="saveAbility">Saving throw ability</label>
+      <select id="saveAbility">
+        <option value="STR">Strength · STR</option>
+        <option value="DEX">Dexterity · DEX</option>
+        <option value="CON">Constitution · CON</option>
+        <option value="INT">Intelligence · INT</option>
+        <option value="WIS">Wisdom · WIS</option>
+        <option value="CHA">Charisma · CHA</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="context" id="contextNote"></p>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>Dit fumble-slag</h2>
+
+      <form id="rollForm" novalidate>
+        <div class="inputs">
+          <div>
+            <label for="d8">Tabel · 1d8</label>
+            <input
+              id="d8"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              max="8"
+              step="1"
+              placeholder="1–8"
+              required
+            >
+          </div>
+          <div>
+            <label for="d100">Udfald · 1d100</label>
+            <input
+              id="d100"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="100"
+              step="1"
+              placeholder="1–100"
+              required
+            >
+          </div>
+        </div>
+
+        <p class="help">
+          00 betyder 100. Indtast egne terningeslag,
+          eller brug knapperne.
+        </p>
+
+        <div class="buttons">
+          <button class="primary" type="submit">Vis mit resultat</button>
+          <button type="button" id="rollBoth">Slå 1d8 + 1d100</button>
+          <div class="secondary">
+            <button type="button" id="rollTable">Slå kun d8</button>
+            <button type="button" id="rollOutcome">Slå kun d100</button>
+          </div>
+        </div>
+
+        <div class="error" id="error" role="alert"></div>
+      </form>
+    </section>
+
+    <section
+      class="panel result"
+      id="result"
+      aria-live="polite"
+      aria-atomic="true"
+    ></section>
+  </div>
+
+  <details>
+    <summary>Hvornår ruller vi? · Regler og varighed</summary>
+    <p>
+      Dette er homebrew til D&D 2014. Aftal udløseren ved bordet.
+      Siden afgør ikke, om det oprindelige slag fejlede.
+    </p>
+    <ul>
+      <li>
+        <strong>Våben og magi:</strong>
+        Brug ved naturlig 1 på et attack roll.
+        Forslag: kun på turens første attack roll.
+        Fjendens succesfulde save mod din spell giver ikke dig et fumble.
+      </li>
+      <li>
+        <strong>Saving throws:</strong>
+        Forslag: naturlig 1, men kun hvis det samlede resultat fejler.
+        Anvend grundeffekten først, derefter ét uheld.
+        Brug ikke disse tabeller til death saves.
+      </li>
+      <li>
+        Et uheld ophæver ikke grundeffektens skade eller conditions.
+        Hvis en ekstra effekt ikke kan anvendes, sker der intet ekstra.
+        Slå ikke igen.
+      </li>
+      <li>
+        Et ekstra angreb fra en tabel kan ikke udløse endnu et fumble.
+        Fejlangreb giver kun den angivne skade, uden Sneak Attack,
+        Divine Smite eller andre tillæg.
+      </li>
+      <li>
+        Ved flere skadetyper vælger DM den primære.
+        Resistance og immunity gælder normalt.
+        Skade kan udløse et normalt concentration-save:
+        Constitution, DC 10 eller halvdelen af skaden, hvad der er højest.
+      </li>
+      <li>
+        Bevægelse kan ikke reduceres under 0.
+        Flytninger fra tabeller sker kun til sikre, ledige pladser.
+        Advantage, disadvantage og conditions følger jeres normale regler.
+      </li>
+      <li>
+        En tabt genstand kan normalt samles op med turens object interaction.
+        Fastspændt skjold tabes ikke.
+        Der bruges ingen ekstra spell slots, og magiske genstande
+        ødelægges ikke permanent af tabellerne.
+      </li>
+      <li>
+        Saving throw-valget tilpasser beskrivelsen og relevante ability
+        checks. Det ændrer ikke grundeffekten af det oprindelige save.
+      </li>
+    </ul>
+  </details>
+
+  <h2 id="overviewTitle"></h2>
+  <ol class="tablelist" id="tableList"></ol>
+  <div id="tables"></div>
+
+  <noscript>Aktivér JavaScript for at bruge fumble-tabellerne.</noscript>
+</main>
+
+<script>
+"use strict";
+
+const DATA = {
+weapon: [
+["Fodfæste og bevægelse", [
+["Usikkert skridt", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["For langt frem", "Du mister 10 ft. af din resterende bevægelse denne tur."],
+["Hælen hænger fast", "Din resterende bevægelse denne tur bliver 0."],
+["Knæ i jorden", "Dexterity save DC 10. Ved fejl falder du prone."],
+["Skævt afsæt", "Dexterity save DC 12. Ved fejl falder du prone."],
+["Rundtosset", "Du kan ikke tage Dash resten af denne tur eller på din næste tur."],
+["Snublende tilbagetog", "Flyt dig 5 ft. væk fra målet til en ledig, sikker plads. Bevægelsen udløser ikke opportunity attacks. Er ingen plads mulig, mister du din reaction indtil starten af din næste tur."],
+["På alle fire", "Du falder prone."],
+["Dårlig landing", "Du falder prone og tager 1d4 bludgeoning damage."],
+["Fuld længde", "Du falder prone, og din resterende bevægelse denne tur bliver 0."]
+]],
+
+["Greb og udstyr", [
+["Dårligt greb", "Dit næste attack roll inden slutningen af din næste tur får −1."],
+["Glider i hånden", "Dit næste attack roll inden slutningen af din næste tur får −2."],
+["Rem om håndleddet", "Du kan ikke bruge object interaction resten af denne tur."],
+["Løs oppakning", "En lille, ikke-magisk genstand fra dit udstyr lander ved dine fødder. DM vælger genstanden."],
+["Tabt redskab", "Dit våben lander ved dine fødder. Har du intet våben i hånden, mister du din reaction indtil starten af din næste tur."],
+["Slynget væk", "Dit våben lander 5 ft. væk på en sikker, ledig plads. Har du intet i hænderne, får dit næste angreb inden slutningen af din næste tur disadvantage."],
+["Fastklemt", "Dit våben sætter sig fast i dit udstyr. Du kan ikke bruge det, før du bruger en bonus action på at frigøre det. Uden genstand: samme effekt på én hånd."],
+["Rygsæk på afveje", "Din oppakning forskubber sig. Din speed reduceres med 10 ft., indtil du bruger en action på at rette den."],
+["Begge hænder fulde", "Du taber alle holdte genstande ved dine fødder. Fastspændt skjold bliver på armen."],
+["Knude på det hele", "Én hånd sidder fast i en rem. En action fra dig eller en allieret inden for 5 ft. frigør den. Indtil da kan hånden ikke bruges."]
+]],
+
+["Åbninger og forsvar", [
+["Læst bevægelse", "Det oprindelige mål får +1 på sit næste attack roll mod dig inden starten af din næste tur."],
+["Åben side", "Det oprindelige mål får +2 på sit næste attack roll mod dig inden starten af din næste tur."],
+["Tabt timing", "Du kan ikke tage reactions indtil starten af din næste tur."],
+["Forudsigelig", "Det næste attack roll mod dig inden starten af din næste tur har advantage."],
+["Skæv parering", "Du får −1 AC indtil starten af din næste tur."],
+["Blottet forsvar", "Du får −2 AC indtil starten af din næste tur."],
+["Fri passage", "Det oprindelige mål kan straks bruge sin reaction til at bevæge sig op til 10 ft. uden opportunity attacks."],
+["Presset tilbage", "Det oprindelige mål kan bruge sin reaction til at skubbe dig 5 ft. til en ledig, sikker plads. Ingen opportunity attacks."],
+["Modhug", "Det oprindelige mål kan straks bruge sin reaction til ét melee attack mod dig, hvis du er inden for dets reach."],
+["Farlig åbning", "Nærmeste fjende, der kan se og nå dig, kan bruge sin reaction til ét melee attack mod dig med advantage. Ved lighed vælger DM."]
+]],
+
+["Sigte og fejlangreb", [
+["For højt", "Angrebet rammer ingenting. Ingen yderligere effekt."],
+["For lavt", "Dit næste attack roll inden slutningen af din næste tur får −1."],
+["Forkert afstand", "Dit næste attack roll mod det oprindelige mål inden slutningen af din næste tur har disadvantage."],
+["Overkorrektion", "Dit næste attack roll inden slutningen af din næste tur har disadvantage."],
+["Vådeskud mod gulvet", "Du tager 1 bludgeoning damage fra et tilbageslag eller en brat bevægelse."],
+["Strejfer dig selv", "Du tager 1d4 damage af angrebets primære skadetype."],
+["Nær ved en ven", "Nærmeste allierede inden for 10 ft. får −2 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."],
+["Uventet mål", "Vælg tilfældigt én anden creature inden for angrebets rækkevidde og synsfelt. Lav et nyt attack roll mod den; ved hit tager den 1d4 af angrebets primære skadetype. Ingen kandidat: ingen ekstra effekt."],
+["Smertefuldt tilbageslag", "Du tager 1d6 damage af angrebets primære skadetype."],
+["Farligt fejlangreb", "Vælg tilfældigt én anden creature inden for angrebets rækkevidde og synsfelt. Lav et nyt attack roll; ved hit tager den 1d6 af angrebets primære skadetype. Ingen kandidat: du tager selv 1d4 af samme type."]
+]],
+
+["Forstrækning og smerte", [
+["Et stik", "Du tager 1 bludgeoning damage."],
+["Øm skulder", "Dit næste Strength check inden slutningen af din næste tur har disadvantage."],
+["Vrid i håndleddet", "Dit næste attack roll inden slutningen af din næste tur får −2."],
+["Kortvarig krampe", "Din speed reduceres med 5 ft. indtil slutningen af din næste tur."],
+["Hård belastning", "Constitution save DC 10. Ved fejl tager du 1d4 bludgeoning damage."],
+["Dårligt knæ", "Constitution save DC 12. Ved fejl halveres din speed indtil slutningen af din næste tur."],
+["Forstrakt arm", "Dit næste attack roll inden slutningen af din næste tur har disadvantage."],
+["Slået luft ud", "Du kan ikke tage reactions indtil slutningen af din næste tur."],
+["Smertefuldt vrid", "Du tager 1d4 bludgeoning damage, og din speed reduceres med 10 ft. indtil slutningen af din næste tur."],
+["Kroppen svigter", "Constitution save DC 12. Ved fejl falder du prone og tager 1d6 bludgeoning damage. Ved succes tager du 1 damage og bliver stående."]
+]],
+
+["Fokus og nerver", [
+["Forbandelse under åndedrættet", "Du siger noget pinligt højt. Ingen mekanisk effekt."],
+["Flakkende blik", "Dit næste Wisdom (Perception) check inden slutningen af din næste tur har disadvantage."],
+["Mister overblikket", "Du kan ikke tage Help resten af denne tur eller på din næste tur."],
+["Tøven", "Din resterende bevægelse denne tur reduceres med 10 ft."],
+["Forstyrrende tanke", "Dit næste attack roll inden slutningen af din næste tur får −2."],
+["Fejllæst modstander", "Det oprindelige mål kan straks flytte 5 ft. til en sikker, ledig plads uden opportunity attacks. Det bruger sin reaction."],
+["Mister tråden", "Dit næste attack roll inden slutningen af din næste tur har disadvantage."],
+["Tunnelblik", "Du kan ikke tage reactions indtil starten af din næste tur."],
+["Et øjebliks frygt", "Wisdom save DC 12. Ved fejl er du frightened af det oprindelige mål indtil slutningen af din næste tur. Frygtimmunitet gælder normalt."],
+["Fastfrosset tøven", "Du mister din resterende bevægelse denne tur og kan ikke tage reactions indtil slutningen af din næste tur."]
+]],
+
+["Omgivelser og støj", [
+["Rungende brag", "Et bump eller råb høres 60 ft. væk, medmindre magisk stilhed forhindrer det. Ingen ekstra effekt."],
+["Støv fra tøjet", "Du nyser eller hoster. Dit næste Stealth check inden slutningen af din næste tur har disadvantage."],
+["Løs sten", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Noget i vejen", "Din resterende bevægelse denne tur reduceres med 10 ft."],
+["Stænk i ansigtet", "Dit næste attack roll inden slutningen af din næste tur får −2. Beskrivelsen tilpasses terrænet."],
+["Dårligt underlag", "Dexterity save DC 12. Ved fejl falder du prone."],
+["Hænger fast i kanten", "Din speed bliver 0, indtil du eller en allieret inden for 5 ft. bruger en bonus action på at frigøre dig."],
+["Albue mod væggen", "Du tager 1d4 bludgeoning damage. På åben grund støder du i stedet dit eget udstyr."],
+["Støv i øjnene", "Dit næste attack roll inden slutningen af din næste tur har disadvantage. Ingen egnet overflade: sved giver samme effekt."],
+["Uheldigt sammenstød", "Du falder prone og taber én holdt genstand ved dine fødder. Har du ingen genstand, tager du i stedet 1d4 bludgeoning damage."]
+]],
+
+["Kaos og komiske uheld", [
+["Næsten elegant", "Du redder situationen med en klodset piruet. Angrebet misser stadig; ingen yderligere effekt."],
+["Forkert kampråb", "Du råber noget helt upassende. Ingen mekanisk effekt."],
+["Hikke midt i det hele", "En høj hikke eller et nys afslører din placering, hvis nogen kunne høre dig inden for 30 ft."],
+["Selvsikker positur", "Din dramatiske afslutning efterlader dig åben. Næste attack roll mod dig inden starten af din næste tur får +2."],
+["Tøj i vejen", "Du kan ikke tage reactions indtil starten af din næste tur."],
+["Forkert hånd", "Du må rette dit greb. Dit næste attack roll inden slutningen af din næste tur får −2."],
+["Løse småpenge", "1d6 af dine mønter lander ved fødderne, højst hvad du har. Ingen mønter: en uvigtig lille genstand falder ud."],
+["Stolthed før faldet", "Du falder prone."],
+["Total forvirring", "Du får disadvantage på dit næste attack roll inden slutningen af din næste tur og mister 10 ft. resterende bevægelse denne tur."],
+["Uheld oven i uheld", "Du falder prone og kan ikke tage reactions indtil starten af din næste tur."]
+]]
+],
+
+magic: [
+["Kontrol over magien", [
+["Ustabil gnist", "En gnist slipper løs. Ingen ekstra effekt."],
+["For tidlig udladning", "Dit næste spell attack inden slutningen af din næste tur får −1."],
+["For sen udladning", "Dit næste spell attack inden slutningen af din næste tur får −2."],
+["Bølgende kraft", "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur har disadvantage."],
+["Uklart mønster", "Dit næste spellcasting ability check inden slutningen af din næste tur har disadvantage."],
+["Brudt rytme", "Du kan ikke tage reactions indtil starten af din næste tur."],
+["Overkorrektion", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
+["Overbelastet gestus", "Din resterende bevægelse denne tur reduceres med 10 ft."],
+["Sitrende energi", "Du tager 1 force damage, og dit næste spell attack inden slutningen af din næste tur får −2."],
+["Magisk hikke", "Dit næste spell attack inden slutningen af din næste tur har disadvantage, og du kan ikke tage reactions indtil starten af din næste tur."]
+]],
+
+["Magisk tilbageslag", [
+["Statisk prikken", "Du mærker en ufarlig sitren. Ingen ekstra effekt."],
+["Lille stød", "Du tager 1 force damage."],
+["Varm håndflade", "Du tager 1 fire damage."],
+["Iskold iling", "Du tager 1 cold damage."],
+["Skingert ekko", "Du tager 1 thunder damage."],
+["Elektrisk smæld", "Du tager 1 lightning damage."],
+["Kraft i håndleddet", "Du tager 1d4 force damage."],
+["Smerte bag øjnene", "Du tager 1d4 psychic damage."],
+["Ustabil puls", "Du tager 1d4 force damage, og din resterende bevægelse denne tur reduceres med 5 ft."],
+["Kraftigt tilbageslag", "Du tager 1d6 force damage. Ingen anden ekstra effekt."]
+]],
+
+["Fokus og gestik", [
+["Forkert finger", "En gestus bliver pinlig. Ingen ekstra effekt."],
+["Uroligt greb", "Dit næste spell attack inden slutningen af din næste tur får −1."],
+["Kludret bevægelse", "Du kan ikke bruge object interaction resten af denne tur."],
+["Komponenter rasler", "Din placering afsløres for creatures inden for 30 ft., der kan høre lyden."],
+["Fokus glider", "Én holdt genstand lander ved dine fødder. Uden holdt genstand mister du din reaction indtil starten af din næste tur."],
+["Rem i fingrene", "Én hånd hænger fast i dit udstyr. Brug en bonus action på at frigøre den; indtil da kan hånden ikke bruges."],
+["Forceret gestus", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
+["Forvirrede komponenter", "Din component pouch eller dit fokus kan ikke bruges, før du bruger en bonus action på at ordne det. Bruger du ingen af delene, gælder det i stedet én hånd."],
+["Fokus på afveje", "Én holdt genstand lander på en sikker plads 5 ft. væk. Har du ingen, falder du prone."],
+["Begge hænder svigter", "Du taber alle holdte genstande ved dine fødder. Fastspændt skjold bliver på armen."]
+]],
+
+["Sanser og magiske ekkoer", [
+["Farvede efterbilleder", "Du ser svage farver et øjeblik. Ingen ekstra effekt."],
+["Brummen i ørerne", "Dit næste hørebaserede Perception check inden slutningen af din næste tur har disadvantage."],
+["Flimmer i blikket", "Dit næste synsbaserede Perception check inden slutningen af din næste tur har disadvantage."],
+["Forstyrrende glimt", "Dit næste spell attack inden slutningen af din næste tur får −1."],
+["Runer på nethinden", "Dit næste spell attack inden slutningen af din næste tur får −2."],
+["Egen stemme runger", "Dit næste Intelligence check inden slutningen af din næste tur har disadvantage."],
+["Forkert afstand", "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur har disadvantage."],
+["Overvældende sanser", "Du kan ikke tage reactions indtil starten af din næste tur."],
+["Dobbeltbillede", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
+["Et smertefuldt ekko", "Du tager 1 psychic damage, og dit næste spell attack inden slutningen af din næste tur har disadvantage."]
+]],
+
+["Rum og fodfæste", [
+["Kappen løfter sig", "En ufarlig vindpust griber dit tøj. Ingen ekstra effekt."],
+["Vaklende skridt", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Forkert afsæt", "Du mister 10 ft. af din resterende bevægelse denne tur."],
+["Fastlåst positur", "Din resterende bevægelse denne tur bliver 0."],
+["Usikker landing", "Dexterity save DC 10. Ved fejl falder du prone."],
+["Kraft fra siden", "Flyt dig 5 ft. til en ledig, sikker plads valgt af DM. Ingen opportunity attacks. Uden sikker plads mister du 5 ft. resterende bevægelse denne tur."],
+["Energi i benene", "Du kan ikke tage Dash resten af denne tur eller på din næste tur."],
+["Knæene giver efter", "Du falder prone."],
+["Hårdt mod gulvet", "Du falder prone og tager 1 bludgeoning damage."],
+["Væltet af kraften", "Du falder prone, og din resterende bevægelse denne tur bliver 0."]
+]],
+
+["Vildfarende energi", [
+["Ud i ingenting", "Restenergien forsvinder. Ingen ekstra effekt."],
+["Ufarligt lysspor", "Et glødende spor afslører din placering for creatures, der kan se dig. Ingen ekstra skade."],
+["Skarpt smæld", "Et smæld høres 60 ft. væk, medmindre magisk stilhed forhindrer det."],
+["For tæt på", "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur får −2."],
+["Skræmt allieret", "Nærmeste allierede inden for 10 ft. får −1 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."],
+["Gnister på huden", "Du tager 1 damage af typen {damage}."],
+["Vildfaren gnist", "Vælg tilfældigt en anden creature inden for 10 ft. af det oprindelige mål og inden for spellens rækkevidde og dit synsfelt. Nyt spell attack; ved hit tager den 1d4 damage af typen {damage}. Ingen kandidat: ingen ekstra effekt."],
+["Forstyrrende bølge", "Nærmeste allierede inden for 10 ft. får −2 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."],
+["Magisk rekyl", "Du tager 1d4 damage af typen {damage}."],
+["Farligt energispor", "Vælg tilfældigt en anden creature inden for 10 ft. af det oprindelige mål og inden for spellens rækkevidde og dit synsfelt. Nyt spell attack; ved hit tager den 1d6 damage af typen {damage}. Ingen kandidat: du tager selv 1 damage af samme type."]
+]],
+
+["Nerver og åbninger", [
+["Højtidelig pause", "Din dramatiske stilhed falder til jorden. Ingen ekstra effekt."],
+["Tydelig hensigt", "Det oprindelige mål får +1 på sit næste attack roll mod dig inden starten af din næste tur."],
+["Blottet side", "Det oprindelige mål får +2 på sit næste attack roll mod dig inden starten af din næste tur."],
+["Ubeskyttet gestus", "Du får −1 AC indtil starten af din næste tur."],
+["Mistet timing", "Du kan ikke tage reactions indtil starten af din næste tur."],
+["Plads til flugt", "Det oprindelige mål kan bruge sin reaction til straks at bevæge sig op til 10 ft. uden opportunity attacks."],
+["Tvivl på kraften", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
+["Åben invitation", "Det næste attack roll mod dig inden starten af din næste tur har advantage."],
+["Dårlig forsvarsstilling", "Du får −2 AC indtil starten af din næste tur."],
+["Modstanderens øjeblik", "Det oprindelige mål kan straks bruge sin reaction til ét melee attack mod dig, hvis du er inden for dets reach."]
+]],
+
+["Magisk kaos og komik", [
+["Forkert farve", "Din besværgelse blinker i en komisk farve. Ingen ekstra effekt."],
+["Heltestemmen knækker", "Dit sidste ord bliver en pibende lyd. Ingen ekstra effekt."],
+["Duft af ristet brød", "Du lugter af ristet brød i 1 minut. Ingen mekanisk effekt."],
+["Glødende øjenbryn", "Dine øjenbryn lyser svagt indtil slutningen af din næste tur. Dit næste Stealth check i denne periode har disadvantage."],
+["Baglæns besværgelse", "Dit næste spell attack inden slutningen af din næste tur får −1."],
+["Kappen over hovedet", "Dit næste spell attack inden slutningen af din næste tur får −2."],
+["Dramatisk nys", "Et nys afslører din placering for creatures inden for 30 ft., der kan høre det."],
+["For meget teater", "Du mister 10 ft. af din resterende bevægelse denne tur."],
+["Tryllekunstnerens fald", "Du falder prone."],
+["Afslutning med gnister", "Du tager 1 force damage og kan ikke tage reactions indtil starten af din næste tur."]
+]]
+],
+
+save: [
+["Efterreaktion", [
+["Et øjebliks rystelse", "Ingen ekstra mekanisk effekt."],
+["Rystende hænder", "Dit næste {ability} check inden slutningen af din næste tur får −1."],
+["Kortvarig spænding", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Svært ved at samle sig", "Dit næste {ability} check inden slutningen af din næste tur får −2."],
+["Ustabil rytme", "Dit næste attack roll inden slutningen af din næste tur får −1."],
+["Forstyrret overblik", "Dit næste Perception check inden slutningen af din næste tur har disadvantage."],
+["Forsinket reaktion", "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."],
+["Rystet koncentrationsevne", "Dit næste {ability} check inden slutningen af din næste tur har disadvantage. Dette påvirker ikke saving throws eller concentration saves."],
+["Ufrivilligt skridt", "Du mister 10 ft. af din resterende bevægelse denne tur."],
+["Et øjeblik uden forsvar", "Det næste attack roll mod dig inden starten af din næste tur får +1."]
+]],
+
+["Fodfæste", [
+["Står stadig", "Ingen ekstra effekt."],
+["Hælen glider", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Skæv vægtfordeling", "Din næste bevægelse inden slutningen af din næste tur koster 5 ft. ekstra bevægelse én gang."],
+["Vaklende stilling", "Dit næste Dexterity (Acrobatics) check inden slutningen af din næste tur får −1."],
+["Forsigtigt afsæt", "Du kan ikke tage Dash resten af den aktuelle tur."],
+["Tunge skridt", "Du mister 10 ft. af din resterende bevægelse denne tur."],
+["Usikkert knæ", "Dit næste Dexterity (Acrobatics) check inden slutningen af din næste tur har disadvantage."],
+["Må finde balancen", "Din næste bevægelse inden slutningen af din næste tur koster 10 ft. ekstra bevægelse én gang."],
+["Knæ i gulvet", "Din resterende bevægelse denne tur bliver 0. Du bliver ikke prone."],
+["Fald på knæ", "Du falder prone. Hvis grundeffekten allerede gør dig prone, sker der intet ekstra."]
+]],
+
+["Sanser og overblik", [
+["Et kort glimt", "Ingen ekstra effekt."],
+["Flakkende opmærksomhed", "Dit næste Perception check inden slutningen af din næste tur får −1."],
+["Fokus på faren", "Dit næste Investigation check inden slutningen af din næste tur får −1."],
+["Sløret overblik", "Dit næste Perception check inden slutningen af din næste tur får −2."],
+["Tvivl om afstand", "Dit næste ranged attack roll inden slutningen af din næste tur får −1."],
+["Mange indtryk", "Dit næste {ability} check inden slutningen af din næste tur får −1."],
+["Et øjebliks tunnelsyn", "Du kan ikke bruge Help til et ability check indtil slutningen af din næste tur."],
+["Forstyrret sansning", "Dit næste Perception check inden slutningen af din næste tur har disadvantage."],
+["Mister en detalje", "Dit næste Investigation check inden slutningen af din næste tur har disadvantage."],
+["Usikkert sigte", "Dit næste attack roll inden slutningen af din næste tur får −1."]
+]],
+
+["Timing og reaktion", [
+["Indhenter rytmen", "Ingen ekstra effekt."],
+["Sen bevægelse", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["For sent vink", "Du kan ikke tage Help resten af denne tur."],
+["Tabt lille øjeblik", "Du kan ikke bruge object interaction resten af denne tur."],
+["Forpasset åbning", "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."],
+["Tøver ved afsættet", "Du kan ikke tage Dash resten af denne tur."],
+["Urolig rytme", "Dit næste attack roll inden slutningen af din næste tur får −1."],
+["Dårlig koordinering", "Dit næste {ability} check inden slutningen af din næste tur får −2."],
+["Bagud i bevægelsen", "Du mister 10 ft. af din resterende bevægelse denne tur."],
+["Reaktionen udebliver", "Du kan ikke tage reactions indtil starten af din næste tur."]
+]],
+
+["Greb og oppakning", [
+["Intet løsner sig", "Ingen ekstra effekt."],
+["Raslen fra udstyret", "Din placering afsløres for creatures inden for 15 ft., der kan høre lyden."],
+["Remmen strammer", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Uroligt greb", "Dit næste attack roll inden slutningen af din næste tur får −1."],
+["Hånden i vejen", "Du kan ikke bruge object interaction resten af denne tur."],
+["Løst spænde", "Dit næste Sleight of Hand check inden slutningen af din næste tur har disadvantage."],
+["En mønt falder", "Én mønt lander ved dine fødder, hvis du har en. Ellers ingen ekstra effekt."],
+["Lille genstand løs", "En uvigtig lille genstand fra din oppakning lander ved dine fødder. DM vælger; ingen sådan genstand: ingen ekstra effekt."],
+["Forskudt oppakning", "Din næste bevægelse inden slutningen af din næste tur koster 5 ft. ekstra bevægelse én gang."],
+["Taber grebet", "Én holdt genstand lander ved dine fødder. Fastspændt skjold bliver på armen. Ingen holdt genstand: ingen ekstra effekt."]
+]],
+
+["Forsvar og position", [
+["Holder stillingen", "Ingen ekstra effekt."],
+["Synlig tøven", "Næste attack roll mod dig inden starten af din næste tur får +1."],
+["En åben side", "Den creature, der udløste dit save, får +1 på sit næste attack roll mod dig inden starten af din næste tur. Ingen creature: ingen ekstra effekt."],
+["Urolig parering", "Dit næste melee attack roll inden slutningen af din næste tur får −1."],
+["Forsigtig stilling", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Tilbagelænet", "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."],
+["Giver plads", "Den creature, der udløste dit save, kan bruge sin reaction til straks at bevæge sig 5 ft. uden opportunity attacks. Ingen creature: ingen ekstra effekt."],
+["Kort åbning", "Du får −1 AC indtil starten af din næste tur."],
+["Mister terræn", "Flyt dig 5 ft. væk fra farens kilde til en ledig, sikker plads. Ingen opportunity attacks. Er det umuligt eller kan du ikke bevæge dig, sker intet ekstra."],
+["Ubeskyttet øjeblik", "Næste attack roll mod dig inden starten af din næste tur får +2."]
+]],
+
+["Vilje og fatning", [
+["Trækker vejret", "Ingen ekstra effekt."],
+["Bider tænderne sammen", "Dit næste {ability} check inden slutningen af din næste tur får −1."],
+["Tvivl i stemmen", "Dit næste Persuasion check inden slutningen af din næste tur får −1."],
+["Forceret selvtillid", "Dit næste Intimidation check inden slutningen af din næste tur får −1."],
+["Forstyrrende tanke", "Dit næste {ability} check inden slutningen af din næste tur får −2."],
+["Svært at læse andre", "Dit næste Insight check inden slutningen af din næste tur har disadvantage."],
+["Behov for ro", "Du kan ikke tage Help resten af denne tur."],
+["Tøver med angrebet", "Dit næste attack roll inden slutningen af din næste tur får −1."],
+["Må samle sig", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Tabt fatning", "Dit næste {ability} check inden slutningen af din næste tur har disadvantage. Det påvirker ikke saving throws."]
+]],
+
+["Støj og små uheld", [
+["Et meget lidt heroisk ansigt", "Du ser kortvarigt komisk forskrækket ud. Ingen mekanisk effekt."],
+["Ufrivilligt udråb", "Du udstøder en lyd, der høres 30 ft. væk, hvis magisk stilhed ikke forhindrer det."],
+["Kappen på tværs", "Du må ryste tøjet på plads. Ingen mekanisk effekt."],
+["Højlydt bandeord", "Din placering afsløres for creatures inden for 30 ft., der kan høre dig."],
+["Klaprende tænder", "Dit næste Stealth check inden slutningen af din næste tur får −1."],
+["Hikke af chok", "Dit næste Stealth check inden slutningen af din næste tur får −2."],
+["Forkert kampråb", "Du får sagt noget pinligt. Ingen mekanisk effekt."],
+["Et lille hop", "Du mister 5 ft. af din resterende bevægelse denne tur."],
+["Lyd fra oppakningen", "Dit næste Stealth check inden slutningen af din næste tur har disadvantage."],
+["Dramatisk vaklen", "Du mister 10 ft. af din resterende bevægelse denne tur. Ingen ekstra skade."]
+]]
+]
+};
+
+const $ = id => document.getElementById(id);
+
+const LABELS = {
+  weapon: "Våben",
+  magic: "Magi",
+  save: "Saving throw"
+};
+
+const ABILITIES = {
+  STR: "Strength",
+  DEX: "Dexterity",
+  CON: "Constitution",
+  INT: "Intelligence",
+  WIS: "Wisdom",
+  CHA: "Charisma"
+};
+
+const SAVE_FLAVOR = {
+  STR: "Din modstandskraft giver efter et øjeblik; du må samle styrken igen.",
+  DEX: "Du reagerer skævt og må genfinde balancen.",
+  CON: "En fysisk efterreaktion løber gennem kroppen.",
+  INT: "Indtrykkene griber ind i dine tanker og forstyrrer dit overblik.",
+  WIS: "Din opmærksomhed bliver revet væk fra omgivelserne.",
+  CHA: "Du mærker et kort brud i din vilje og selvkontrol."
+};
+
+const UNARMED = {
+  "Rem om håndleddet": [
+    "Stive fingre",
+    "Du kan ikke bruge object interaction resten af denne tur."
+  ],
+  "Løs oppakning": [
+    "Uroligt greb",
+    "Dit næste attack roll inden slutningen af din næste tur får −1."
+  ],
+  "Tabt redskab": [
+    "Fejl i paraden",
+    "Du kan ikke tage reactions indtil starten af din næste tur."
+  ],
+  "Slynget væk": [
+    "For langt ud",
+    "Dit næste attack roll inden slutningen af din næste tur har disadvantage."
+  ],
+  "Fastklemt": [
+    "Hånden låser",
+    "Én hånd kan ikke bruges, før du bruger en bonus action på at løsne krampe eller fastklemt greb."
+  ],
+  "Rygsæk på afveje": [
+    "Spænding i kroppen",
+    "Din speed reduceres med 10 ft., indtil du bruger en action på at strække kroppen."
+  ],
+  "Begge hænder fulde": [
+    "Ude af balance",
+    "Du falder prone."
+  ],
+  "Knude på det hele": [
+    "Fastlåst led",
+    "Én hånd eller ét angrebslem kan ikke bruges, før du eller en allieret inden for 5 ft. bruger en action på at frigøre det."
+  ],
+  "Vådeskud mod gulvet": [
+    "Skævt stød",
+    "Du tager 1 bludgeoning damage fra en brat bevægelse."
+  ],
+  "Uheldigt sammenstød": [
+    "Uheldigt sammenstød",
+    "Du falder prone og tager 1 bludgeoning damage."
+  ]
+};
+
+let category = "weapon";
+
+function esc(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
+}
+
+function contextLabel() {
+  if (category === "save") {
+    return "Saving throw · " + ABILITIES[$("saveAbility").value];
+  }
+  if (category === "magic") {
+    return "Magi · " + $("damageType").value;
+  }
+  const types = {
+    melee: "Nærkamp",
+    ranged: "Afstand / kast",
+    unarmed: "Ubevæbnet / naturligt"
+  };
+  return "Våben · " + types[$("weaponType").value];
+}
+
+function adapt(original) {
+  let title = original[0];
+  let effect = original[1];
+
+  if (category === "save") {
+    effect = effect.replaceAll(
+      "{ability}",
+      ABILITIES[$("saveAbility").value]
+    );
+  }
+
+  if (category === "magic") {
+    effect = effect.replaceAll("{damage}", $("damageType").value);
+  }
+
+  if (category === "weapon") {
+    const type = $("weaponType").value;
+    if (type === "unarmed" && UNARMED[title]) {
+      [title, effect] = UNARMED[title];
+    }
+    if (type === "ranged") {
+      if (title === "Vådeskud mod gulvet") {
+        title = "Projektilet slår forkert";
+      }
+      if (title === "Albue mod væggen") {
+        title = "Hårdt tilbageslag";
+      }
+    }
+  }
+
+  return { title, effect };
+}
+
+function range(index) {
+  const lo = index * 10 + 1;
+  const hi = (index + 1) * 10;
+  return String(lo).padStart(2, "0") + "–" +
+         String(hi).padStart(2, "0");
+}
+
+function resetResult() {
+  $("error").textContent = "";
+  $("result").innerHTML =
+    '<span class="badge">' + esc(contextLabel()) + '</span>' +
+    '<h2>Et uheld venter …</h2>' +
+    '<p>Slå 1d8 og 1d100, eller indtast dine egne slag.</p>';
+}
+
+function renderTables() {
+  $("overviewTitle").textContent =
+    contextLabel() + " · otte tabeller";
+
+  $("tableList").innerHTML = DATA[category].map((table, i) =>
+    '<li><a href="#table-' + (i + 1) +
+    '" data-table="' + (i + 1) + '">' +
+    esc(table[0]) + '</a></li>'
+  ).join("");
+
+  $("tables").innerHTML = DATA[category].map((table, i) =>
+    '<details id="table-' + (i + 1) + '">' +
+    '<summary>' + (i + 1) + '. ' + esc(table[0]) + '</summary>' +
+    '<table><thead><tr>' +
+    '<th scope="col">d100</th>' +
+    '<th scope="col">Uheld og effekt</th>' +
+    '</tr></thead><tbody>' +
+    table[1].map((original, j) => {
+      const row = adapt(original);
+      return '<tr id="row-' + (i + 1) + '-' + j + '">' +
+        '<td>' + range(j) + '</td>' +
+        '<td><strong>' + esc(row.title) + '</strong>' +
+        esc(row.effect) + '</td></tr>';
+    }).join("") +
+    '</tbody></table></details>'
+  ).join("");
+
+  document.querySelectorAll("[data-table]").forEach(link => {
+    link.addEventListener("click", () => {
+      $("table-" + link.dataset.table).open = true;
+    });
+  });
+}
+
+function refresh() {
+  document.querySelectorAll("[data-category]").forEach(button => {
+    button.setAttribute(
+      "aria-pressed",
+      String(button.dataset.category === category)
+    );
+  });
+
+  $("weaponOptions").hidden = category !== "weapon";
+  $("magicOptions").hidden = category !== "magic";
+  $("saveOptions").hidden = category !== "save";
+
+  const notes = {
+    weapon: "Vælg angrebstype. Slå derefter 1d8 og 1d100.",
+    magic: "Til dit spell attack. Fjendens succesfulde saving throw udløser ikke et fumble for dig.",
+    save: "Anvend først konsekvensen af dit fejlede save. Uheldet er en mildere ekstra eftervirkning. Ikke til death saves."
+  };
+
+  $("contextNote").textContent = notes[category];
+  renderTables();
+  resetResult();
+}
+
+function showResult() {
+  const raw8 = $("d8").value.trim();
+  const raw100 = $("d100").value.trim();
+  const d8 = Number(raw8);
+  const d100 =
+    raw100 !== "" && Number(raw100) === 0
+      ? 100
+      : Number(raw100);
+
+  if (
+    raw8 === "" ||
+    raw100 === "" ||
+    !Number.isInteger(d8) ||
+    d8 < 1 || d8 > 8 ||
+    !Number.isInteger(d100) ||
+    d100 < 1 || d100 > 100
+  ) {
+    $("error").textContent =
+      "Indtast et helt tal fra 1–8 og et helt tal fra 1–100 (eller 00).";
+    return;
+  }
+
+  $("error").textContent = "";
+  $("d100").value = d100;
+
+  const table = DATA[category][d8 - 1];
+  const rowIndex = Math.floor((d100 - 1) / 10);
+  const row = adapt(table[1][rowIndex]);
+
+  const flavor = category === "save"
+    ? '<p class="flavor">' +
+      esc(SAVE_FLAVOR[$("saveAbility").value]) + '</p>'
+    : "";
+
+  $("result").innerHTML =
+    '<span class="badge">' + esc(contextLabel()) + '</span>' +
+    '<span class="badge">D8: ' + d8 + ' · ' +
+    esc(table[0]) + '</span>' +
+    '<span class="badge">D100: ' + d100 + ' · ' +
+    range(rowIndex) + '</span>' +
+    '<h2>' + esc(row.title) + '</h2>' +
+    flavor +
+    '<p class="effect">' + esc(row.effect) + '</p>' +
+    '<button type="button" id="openResultTable">' +
+    'Se udfaldet i tabellen</button>';
+
+  document.querySelectorAll("tr.selected").forEach(row => {
+    row.classList.remove("selected");
+  });
+
+  const selected = $("row-" + d8 + "-" + rowIndex);
+  selected.classList.add("selected");
+
+  $("openResultTable").addEventListener("click", () => {
+    $("table-" + d8).open = true;
+    selected.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  });
+}
+
+function roll(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+document.querySelectorAll("[data-category]").forEach(button => {
+  button.addEventListener("click", () => {
+    category = button.dataset.category;
+    refresh();
+  });
+});
+
+["weaponType", "damageType", "saveAbility"].forEach(id => {
+  $(id).addEventListener("change", refresh);
+});
+
+$("rollForm").addEventListener("submit", event => {
+  event.preventDefault();
+  showResult();
+});
+
+$("rollBoth").addEventListener("click", () => {
+  $("d8").value = roll(8);
+  $("d100").value = roll(100);
+  showResult();
+});
+
+$("rollTable").addEventListener("click", () => {
+  $("d8").value = roll(8);
+  $("error").textContent = "";
+  if ($("d100").value.trim() !== "") {
+    showResult();
+  }
+});
+
+$("rollOutcome").addEventListener("click", () => {
+  $("d100").value = roll(100);
+  $("error").textContent = "";
+  if ($("d8").value.trim() !== "") {
+    showResult();
+  }
+});
+
+refresh();
+</script>
+</body>
+</html>
