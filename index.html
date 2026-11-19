@@ -204,7 +204,7 @@ a { color: var(--gold); }
       Vælg kategori. Slå <strong>1d8</strong> for tabellen
       og <strong>1d100</strong> for uheldet.
     </p>
-    <div class="context">3 kategorier · 24 tabeller · 240 udfald</div>
+    <div class="context">3 kategorier · 24 tabeller · 240 udfald · mere komisk kaos</div>
   </header>
 
   <div class="tabs" role="group" aria-label="Kategori">
@@ -345,7 +345,7 @@ a { color: var(--gold); }
       <li>
         Et uheld ophæver ikke grundeffektens skade eller conditions.
         Hvis en ekstra effekt ikke kan anvendes, sker der intet ekstra.
-        Slå ikke igen.
+        Slå ikke igen. Et ekstra saving throw fra en tabel kan heller ikke starte endnu et fumble. Kosmetisk magi giver kun de udtrykkeligt beskrevne effekter: ingen gratis angreb, cover, ressourcer eller tvungne reaktioner fra andre.
       </li>
       <li>
         Et ekstra angreb fra en tabel kan ikke udløse endnu et fumble.
@@ -359,7 +359,7 @@ a { color: var(--gold); }
         Constitution, DC 10 eller halvdelen af skaden, hvad der er højest.
       </li>
       <li>
-        Bevægelse kan ikke reduceres under 0.
+        Bevægelse kan ikke reduceres under 0. En speed-reduktion gælder fra nu og gennem din næste tur; allerede foretaget bevægelse ændres ikke. Hvis du allerede har brugt mere bevægelse end din reducerede speed på den aktuelle tur, har du ingen bevægelse tilbage på den tur.
         Flytninger fra tabeller sker kun til sikre, ledige pladser.
         Advantage, disadvantage og conditions følger jeres normale regler.
       </li>
@@ -380,6 +380,15 @@ a { color: var(--gold); }
   <ol class="tablelist" id="tableList"></ol>
   <div id="tables"></div>
 
+  <details>
+    <summary>Inspiration og danske tilpasninger</summary>
+    <p>Selvskrevet dansk homebrew. Komiske idéer er blandt andet inspireret af
+    <a href="https://www.reddit.com/r/d100/comments/i6hk97/lets_build_d100_stupid_mistakes_during_combat/" target="_blank" rel="noopener">r/d100: Stupid Mistakes During Combat</a>,
+    <a href="https://www.reddit.com/r/d100/comments/r2vnay/" target="_blank" rel="noopener">r/d100: Unusual Combat Results</a>,
+    <a href="https://www.glassstaff.com/pages/ultimate-fumble-chart" target="_blank" rel="noopener">GlassStaff</a> og
+    <a href="https://blog.d4caltrops.com/2022/04/d100-magical-mishaps-calamitous-curses.html" target="_blank" rel="noopener">d4 Caltrops</a>.
+    Effekter og varighed er tilpasset her; tabellerne er ikke ordrette kopier.</p>
+  </details>
   <noscript>Aktivér JavaScript for at bruge fumble-tabellerne.</noscript>
 </main>
 
@@ -387,323 +396,1092 @@ a { color: var(--gold); }
 "use strict";
 
 const DATA = {
-weapon: [
-["Fodfæste og bevægelse", [
-["Usikkert skridt", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["For langt frem", "Du mister 10 ft. af din resterende bevægelse denne tur."],
-["Hælen hænger fast", "Din resterende bevægelse denne tur bliver 0."],
-["Knæ i jorden", "Dexterity save DC 10. Ved fejl falder du prone."],
-["Skævt afsæt", "Dexterity save DC 12. Ved fejl falder du prone."],
-["Rundtosset", "Du kan ikke tage Dash resten af denne tur eller på din næste tur."],
-["Snublende tilbagetog", "Flyt dig 5 ft. væk fra målet til en ledig, sikker plads. Bevægelsen udløser ikke opportunity attacks. Er ingen plads mulig, mister du din reaction indtil starten af din næste tur."],
-["På alle fire", "Du falder prone."],
-["Dårlig landing", "Du falder prone og tager 1d4 bludgeoning damage."],
-["Fuld længde", "Du falder prone, og din resterende bevægelse denne tur bliver 0."]
-]],
-
-["Greb og udstyr", [
-["Dårligt greb", "Dit næste attack roll inden slutningen af din næste tur får −1."],
-["Glider i hånden", "Dit næste attack roll inden slutningen af din næste tur får −2."],
-["Rem om håndleddet", "Du kan ikke bruge object interaction resten af denne tur."],
-["Løs oppakning", "En lille, ikke-magisk genstand fra dit udstyr lander ved dine fødder. DM vælger genstanden."],
-["Tabt redskab", "Dit våben lander ved dine fødder. Har du intet våben i hånden, mister du din reaction indtil starten af din næste tur."],
-["Slynget væk", "Dit våben lander 5 ft. væk på en sikker, ledig plads. Har du intet i hænderne, får dit næste angreb inden slutningen af din næste tur disadvantage."],
-["Fastklemt", "Dit våben sætter sig fast i dit udstyr. Du kan ikke bruge det, før du bruger en bonus action på at frigøre det. Uden genstand: samme effekt på én hånd."],
-["Rygsæk på afveje", "Din oppakning forskubber sig. Din speed reduceres med 10 ft., indtil du bruger en action på at rette den."],
-["Begge hænder fulde", "Du taber alle holdte genstande ved dine fødder. Fastspændt skjold bliver på armen."],
-["Knude på det hele", "Én hånd sidder fast i en rem. En action fra dig eller en allieret inden for 5 ft. frigør den. Indtil da kan hånden ikke bruges."]
-]],
-
-["Åbninger og forsvar", [
-["Læst bevægelse", "Det oprindelige mål får +1 på sit næste attack roll mod dig inden starten af din næste tur."],
-["Åben side", "Det oprindelige mål får +2 på sit næste attack roll mod dig inden starten af din næste tur."],
-["Tabt timing", "Du kan ikke tage reactions indtil starten af din næste tur."],
-["Forudsigelig", "Det næste attack roll mod dig inden starten af din næste tur har advantage."],
-["Skæv parering", "Du får −1 AC indtil starten af din næste tur."],
-["Blottet forsvar", "Du får −2 AC indtil starten af din næste tur."],
-["Fri passage", "Det oprindelige mål kan straks bruge sin reaction til at bevæge sig op til 10 ft. uden opportunity attacks."],
-["Presset tilbage", "Det oprindelige mål kan bruge sin reaction til at skubbe dig 5 ft. til en ledig, sikker plads. Ingen opportunity attacks."],
-["Modhug", "Det oprindelige mål kan straks bruge sin reaction til ét melee attack mod dig, hvis du er inden for dets reach."],
-["Farlig åbning", "Nærmeste fjende, der kan se og nå dig, kan bruge sin reaction til ét melee attack mod dig med advantage. Ved lighed vælger DM."]
-]],
-
-["Sigte og fejlangreb", [
-["For højt", "Angrebet rammer ingenting. Ingen yderligere effekt."],
-["For lavt", "Dit næste attack roll inden slutningen af din næste tur får −1."],
-["Forkert afstand", "Dit næste attack roll mod det oprindelige mål inden slutningen af din næste tur har disadvantage."],
-["Overkorrektion", "Dit næste attack roll inden slutningen af din næste tur har disadvantage."],
-["Vådeskud mod gulvet", "Du tager 1 bludgeoning damage fra et tilbageslag eller en brat bevægelse."],
-["Strejfer dig selv", "Du tager 1d4 damage af angrebets primære skadetype."],
-["Nær ved en ven", "Nærmeste allierede inden for 10 ft. får −2 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."],
-["Uventet mål", "Vælg tilfældigt én anden creature inden for angrebets rækkevidde og synsfelt. Lav et nyt attack roll mod den; ved hit tager den 1d4 af angrebets primære skadetype. Ingen kandidat: ingen ekstra effekt."],
-["Smertefuldt tilbageslag", "Du tager 1d6 damage af angrebets primære skadetype."],
-["Farligt fejlangreb", "Vælg tilfældigt én anden creature inden for angrebets rækkevidde og synsfelt. Lav et nyt attack roll; ved hit tager den 1d6 af angrebets primære skadetype. Ingen kandidat: du tager selv 1d4 af samme type."]
-]],
-
-["Forstrækning og smerte", [
-["Et stik", "Du tager 1 bludgeoning damage."],
-["Øm skulder", "Dit næste Strength check inden slutningen af din næste tur har disadvantage."],
-["Vrid i håndleddet", "Dit næste attack roll inden slutningen af din næste tur får −2."],
-["Kortvarig krampe", "Din speed reduceres med 5 ft. indtil slutningen af din næste tur."],
-["Hård belastning", "Constitution save DC 10. Ved fejl tager du 1d4 bludgeoning damage."],
-["Dårligt knæ", "Constitution save DC 12. Ved fejl halveres din speed indtil slutningen af din næste tur."],
-["Forstrakt arm", "Dit næste attack roll inden slutningen af din næste tur har disadvantage."],
-["Slået luft ud", "Du kan ikke tage reactions indtil slutningen af din næste tur."],
-["Smertefuldt vrid", "Du tager 1d4 bludgeoning damage, og din speed reduceres med 10 ft. indtil slutningen af din næste tur."],
-["Kroppen svigter", "Constitution save DC 12. Ved fejl falder du prone og tager 1d6 bludgeoning damage. Ved succes tager du 1 damage og bliver stående."]
-]],
-
-["Fokus og nerver", [
-["Forbandelse under åndedrættet", "Du siger noget pinligt højt. Ingen mekanisk effekt."],
-["Flakkende blik", "Dit næste Wisdom (Perception) check inden slutningen af din næste tur har disadvantage."],
-["Mister overblikket", "Du kan ikke tage Help resten af denne tur eller på din næste tur."],
-["Tøven", "Din resterende bevægelse denne tur reduceres med 10 ft."],
-["Forstyrrende tanke", "Dit næste attack roll inden slutningen af din næste tur får −2."],
-["Fejllæst modstander", "Det oprindelige mål kan straks flytte 5 ft. til en sikker, ledig plads uden opportunity attacks. Det bruger sin reaction."],
-["Mister tråden", "Dit næste attack roll inden slutningen af din næste tur har disadvantage."],
-["Tunnelblik", "Du kan ikke tage reactions indtil starten af din næste tur."],
-["Et øjebliks frygt", "Wisdom save DC 12. Ved fejl er du frightened af det oprindelige mål indtil slutningen af din næste tur. Frygtimmunitet gælder normalt."],
-["Fastfrosset tøven", "Du mister din resterende bevægelse denne tur og kan ikke tage reactions indtil slutningen af din næste tur."]
-]],
-
-["Omgivelser og støj", [
-["Rungende brag", "Et bump eller råb høres 60 ft. væk, medmindre magisk stilhed forhindrer det. Ingen ekstra effekt."],
-["Støv fra tøjet", "Du nyser eller hoster. Dit næste Stealth check inden slutningen af din næste tur har disadvantage."],
-["Løs sten", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Noget i vejen", "Din resterende bevægelse denne tur reduceres med 10 ft."],
-["Stænk i ansigtet", "Dit næste attack roll inden slutningen af din næste tur får −2. Beskrivelsen tilpasses terrænet."],
-["Dårligt underlag", "Dexterity save DC 12. Ved fejl falder du prone."],
-["Hænger fast i kanten", "Din speed bliver 0, indtil du eller en allieret inden for 5 ft. bruger en bonus action på at frigøre dig."],
-["Albue mod væggen", "Du tager 1d4 bludgeoning damage. På åben grund støder du i stedet dit eget udstyr."],
-["Støv i øjnene", "Dit næste attack roll inden slutningen af din næste tur har disadvantage. Ingen egnet overflade: sved giver samme effekt."],
-["Uheldigt sammenstød", "Du falder prone og taber én holdt genstand ved dine fødder. Har du ingen genstand, tager du i stedet 1d4 bludgeoning damage."]
-]],
-
-["Kaos og komiske uheld", [
-["Næsten elegant", "Du redder situationen med en klodset piruet. Angrebet misser stadig; ingen yderligere effekt."],
-["Forkert kampråb", "Du råber noget helt upassende. Ingen mekanisk effekt."],
-["Hikke midt i det hele", "En høj hikke eller et nys afslører din placering, hvis nogen kunne høre dig inden for 30 ft."],
-["Selvsikker positur", "Din dramatiske afslutning efterlader dig åben. Næste attack roll mod dig inden starten af din næste tur får +2."],
-["Tøj i vejen", "Du kan ikke tage reactions indtil starten af din næste tur."],
-["Forkert hånd", "Du må rette dit greb. Dit næste attack roll inden slutningen af din næste tur får −2."],
-["Løse småpenge", "1d6 af dine mønter lander ved fødderne, højst hvad du har. Ingen mønter: en uvigtig lille genstand falder ud."],
-["Stolthed før faldet", "Du falder prone."],
-["Total forvirring", "Du får disadvantage på dit næste attack roll inden slutningen af din næste tur og mister 10 ft. resterende bevægelse denne tur."],
-["Uheld oven i uheld", "Du falder prone og kan ikke tage reactions indtil starten af din næste tur."]
-]]
-],
-
-magic: [
-["Kontrol over magien", [
-["Ustabil gnist", "En gnist slipper løs. Ingen ekstra effekt."],
-["For tidlig udladning", "Dit næste spell attack inden slutningen af din næste tur får −1."],
-["For sen udladning", "Dit næste spell attack inden slutningen af din næste tur får −2."],
-["Bølgende kraft", "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur har disadvantage."],
-["Uklart mønster", "Dit næste spellcasting ability check inden slutningen af din næste tur har disadvantage."],
-["Brudt rytme", "Du kan ikke tage reactions indtil starten af din næste tur."],
-["Overkorrektion", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
-["Overbelastet gestus", "Din resterende bevægelse denne tur reduceres med 10 ft."],
-["Sitrende energi", "Du tager 1 force damage, og dit næste spell attack inden slutningen af din næste tur får −2."],
-["Magisk hikke", "Dit næste spell attack inden slutningen af din næste tur har disadvantage, og du kan ikke tage reactions indtil starten af din næste tur."]
-]],
-
-["Magisk tilbageslag", [
-["Statisk prikken", "Du mærker en ufarlig sitren. Ingen ekstra effekt."],
-["Lille stød", "Du tager 1 force damage."],
-["Varm håndflade", "Du tager 1 fire damage."],
-["Iskold iling", "Du tager 1 cold damage."],
-["Skingert ekko", "Du tager 1 thunder damage."],
-["Elektrisk smæld", "Du tager 1 lightning damage."],
-["Kraft i håndleddet", "Du tager 1d4 force damage."],
-["Smerte bag øjnene", "Du tager 1d4 psychic damage."],
-["Ustabil puls", "Du tager 1d4 force damage, og din resterende bevægelse denne tur reduceres med 5 ft."],
-["Kraftigt tilbageslag", "Du tager 1d6 force damage. Ingen anden ekstra effekt."]
-]],
-
-["Fokus og gestik", [
-["Forkert finger", "En gestus bliver pinlig. Ingen ekstra effekt."],
-["Uroligt greb", "Dit næste spell attack inden slutningen af din næste tur får −1."],
-["Kludret bevægelse", "Du kan ikke bruge object interaction resten af denne tur."],
-["Komponenter rasler", "Din placering afsløres for creatures inden for 30 ft., der kan høre lyden."],
-["Fokus glider", "Én holdt genstand lander ved dine fødder. Uden holdt genstand mister du din reaction indtil starten af din næste tur."],
-["Rem i fingrene", "Én hånd hænger fast i dit udstyr. Brug en bonus action på at frigøre den; indtil da kan hånden ikke bruges."],
-["Forceret gestus", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
-["Forvirrede komponenter", "Din component pouch eller dit fokus kan ikke bruges, før du bruger en bonus action på at ordne det. Bruger du ingen af delene, gælder det i stedet én hånd."],
-["Fokus på afveje", "Én holdt genstand lander på en sikker plads 5 ft. væk. Har du ingen, falder du prone."],
-["Begge hænder svigter", "Du taber alle holdte genstande ved dine fødder. Fastspændt skjold bliver på armen."]
-]],
-
-["Sanser og magiske ekkoer", [
-["Farvede efterbilleder", "Du ser svage farver et øjeblik. Ingen ekstra effekt."],
-["Brummen i ørerne", "Dit næste hørebaserede Perception check inden slutningen af din næste tur har disadvantage."],
-["Flimmer i blikket", "Dit næste synsbaserede Perception check inden slutningen af din næste tur har disadvantage."],
-["Forstyrrende glimt", "Dit næste spell attack inden slutningen af din næste tur får −1."],
-["Runer på nethinden", "Dit næste spell attack inden slutningen af din næste tur får −2."],
-["Egen stemme runger", "Dit næste Intelligence check inden slutningen af din næste tur har disadvantage."],
-["Forkert afstand", "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur har disadvantage."],
-["Overvældende sanser", "Du kan ikke tage reactions indtil starten af din næste tur."],
-["Dobbeltbillede", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
-["Et smertefuldt ekko", "Du tager 1 psychic damage, og dit næste spell attack inden slutningen af din næste tur har disadvantage."]
-]],
-
-["Rum og fodfæste", [
-["Kappen løfter sig", "En ufarlig vindpust griber dit tøj. Ingen ekstra effekt."],
-["Vaklende skridt", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Forkert afsæt", "Du mister 10 ft. af din resterende bevægelse denne tur."],
-["Fastlåst positur", "Din resterende bevægelse denne tur bliver 0."],
-["Usikker landing", "Dexterity save DC 10. Ved fejl falder du prone."],
-["Kraft fra siden", "Flyt dig 5 ft. til en ledig, sikker plads valgt af DM. Ingen opportunity attacks. Uden sikker plads mister du 5 ft. resterende bevægelse denne tur."],
-["Energi i benene", "Du kan ikke tage Dash resten af denne tur eller på din næste tur."],
-["Knæene giver efter", "Du falder prone."],
-["Hårdt mod gulvet", "Du falder prone og tager 1 bludgeoning damage."],
-["Væltet af kraften", "Du falder prone, og din resterende bevægelse denne tur bliver 0."]
-]],
-
-["Vildfarende energi", [
-["Ud i ingenting", "Restenergien forsvinder. Ingen ekstra effekt."],
-["Ufarligt lysspor", "Et glødende spor afslører din placering for creatures, der kan se dig. Ingen ekstra skade."],
-["Skarpt smæld", "Et smæld høres 60 ft. væk, medmindre magisk stilhed forhindrer det."],
-["For tæt på", "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur får −2."],
-["Skræmt allieret", "Nærmeste allierede inden for 10 ft. får −1 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."],
-["Gnister på huden", "Du tager 1 damage af typen {damage}."],
-["Vildfaren gnist", "Vælg tilfældigt en anden creature inden for 10 ft. af det oprindelige mål og inden for spellens rækkevidde og dit synsfelt. Nyt spell attack; ved hit tager den 1d4 damage af typen {damage}. Ingen kandidat: ingen ekstra effekt."],
-["Forstyrrende bølge", "Nærmeste allierede inden for 10 ft. får −2 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."],
-["Magisk rekyl", "Du tager 1d4 damage af typen {damage}."],
-["Farligt energispor", "Vælg tilfældigt en anden creature inden for 10 ft. af det oprindelige mål og inden for spellens rækkevidde og dit synsfelt. Nyt spell attack; ved hit tager den 1d6 damage af typen {damage}. Ingen kandidat: du tager selv 1 damage af samme type."]
-]],
-
-["Nerver og åbninger", [
-["Højtidelig pause", "Din dramatiske stilhed falder til jorden. Ingen ekstra effekt."],
-["Tydelig hensigt", "Det oprindelige mål får +1 på sit næste attack roll mod dig inden starten af din næste tur."],
-["Blottet side", "Det oprindelige mål får +2 på sit næste attack roll mod dig inden starten af din næste tur."],
-["Ubeskyttet gestus", "Du får −1 AC indtil starten af din næste tur."],
-["Mistet timing", "Du kan ikke tage reactions indtil starten af din næste tur."],
-["Plads til flugt", "Det oprindelige mål kan bruge sin reaction til straks at bevæge sig op til 10 ft. uden opportunity attacks."],
-["Tvivl på kraften", "Dit næste spell attack inden slutningen af din næste tur har disadvantage."],
-["Åben invitation", "Det næste attack roll mod dig inden starten af din næste tur har advantage."],
-["Dårlig forsvarsstilling", "Du får −2 AC indtil starten af din næste tur."],
-["Modstanderens øjeblik", "Det oprindelige mål kan straks bruge sin reaction til ét melee attack mod dig, hvis du er inden for dets reach."]
-]],
-
-["Magisk kaos og komik", [
-["Forkert farve", "Din besværgelse blinker i en komisk farve. Ingen ekstra effekt."],
-["Heltestemmen knækker", "Dit sidste ord bliver en pibende lyd. Ingen ekstra effekt."],
-["Duft af ristet brød", "Du lugter af ristet brød i 1 minut. Ingen mekanisk effekt."],
-["Glødende øjenbryn", "Dine øjenbryn lyser svagt indtil slutningen af din næste tur. Dit næste Stealth check i denne periode har disadvantage."],
-["Baglæns besværgelse", "Dit næste spell attack inden slutningen af din næste tur får −1."],
-["Kappen over hovedet", "Dit næste spell attack inden slutningen af din næste tur får −2."],
-["Dramatisk nys", "Et nys afslører din placering for creatures inden for 30 ft., der kan høre det."],
-["For meget teater", "Du mister 10 ft. af din resterende bevægelse denne tur."],
-["Tryllekunstnerens fald", "Du falder prone."],
-["Afslutning med gnister", "Du tager 1 force damage og kan ikke tage reactions indtil starten af din næste tur."]
-]]
-],
-
-save: [
-["Efterreaktion", [
-["Et øjebliks rystelse", "Ingen ekstra mekanisk effekt."],
-["Rystende hænder", "Dit næste {ability} check inden slutningen af din næste tur får −1."],
-["Kortvarig spænding", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Svært ved at samle sig", "Dit næste {ability} check inden slutningen af din næste tur får −2."],
-["Ustabil rytme", "Dit næste attack roll inden slutningen af din næste tur får −1."],
-["Forstyrret overblik", "Dit næste Perception check inden slutningen af din næste tur har disadvantage."],
-["Forsinket reaktion", "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."],
-["Rystet koncentrationsevne", "Dit næste {ability} check inden slutningen af din næste tur har disadvantage. Dette påvirker ikke saving throws eller concentration saves."],
-["Ufrivilligt skridt", "Du mister 10 ft. af din resterende bevægelse denne tur."],
-["Et øjeblik uden forsvar", "Det næste attack roll mod dig inden starten af din næste tur får +1."]
-]],
-
-["Fodfæste", [
-["Står stadig", "Ingen ekstra effekt."],
-["Hælen glider", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Skæv vægtfordeling", "Din næste bevægelse inden slutningen af din næste tur koster 5 ft. ekstra bevægelse én gang."],
-["Vaklende stilling", "Dit næste Dexterity (Acrobatics) check inden slutningen af din næste tur får −1."],
-["Forsigtigt afsæt", "Du kan ikke tage Dash resten af den aktuelle tur."],
-["Tunge skridt", "Du mister 10 ft. af din resterende bevægelse denne tur."],
-["Usikkert knæ", "Dit næste Dexterity (Acrobatics) check inden slutningen af din næste tur har disadvantage."],
-["Må finde balancen", "Din næste bevægelse inden slutningen af din næste tur koster 10 ft. ekstra bevægelse én gang."],
-["Knæ i gulvet", "Din resterende bevægelse denne tur bliver 0. Du bliver ikke prone."],
-["Fald på knæ", "Du falder prone. Hvis grundeffekten allerede gør dig prone, sker der intet ekstra."]
-]],
-
-["Sanser og overblik", [
-["Et kort glimt", "Ingen ekstra effekt."],
-["Flakkende opmærksomhed", "Dit næste Perception check inden slutningen af din næste tur får −1."],
-["Fokus på faren", "Dit næste Investigation check inden slutningen af din næste tur får −1."],
-["Sløret overblik", "Dit næste Perception check inden slutningen af din næste tur får −2."],
-["Tvivl om afstand", "Dit næste ranged attack roll inden slutningen af din næste tur får −1."],
-["Mange indtryk", "Dit næste {ability} check inden slutningen af din næste tur får −1."],
-["Et øjebliks tunnelsyn", "Du kan ikke bruge Help til et ability check indtil slutningen af din næste tur."],
-["Forstyrret sansning", "Dit næste Perception check inden slutningen af din næste tur har disadvantage."],
-["Mister en detalje", "Dit næste Investigation check inden slutningen af din næste tur har disadvantage."],
-["Usikkert sigte", "Dit næste attack roll inden slutningen af din næste tur får −1."]
-]],
-
-["Timing og reaktion", [
-["Indhenter rytmen", "Ingen ekstra effekt."],
-["Sen bevægelse", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["For sent vink", "Du kan ikke tage Help resten af denne tur."],
-["Tabt lille øjeblik", "Du kan ikke bruge object interaction resten af denne tur."],
-["Forpasset åbning", "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."],
-["Tøver ved afsættet", "Du kan ikke tage Dash resten af denne tur."],
-["Urolig rytme", "Dit næste attack roll inden slutningen af din næste tur får −1."],
-["Dårlig koordinering", "Dit næste {ability} check inden slutningen af din næste tur får −2."],
-["Bagud i bevægelsen", "Du mister 10 ft. af din resterende bevægelse denne tur."],
-["Reaktionen udebliver", "Du kan ikke tage reactions indtil starten af din næste tur."]
-]],
-
-["Greb og oppakning", [
-["Intet løsner sig", "Ingen ekstra effekt."],
-["Raslen fra udstyret", "Din placering afsløres for creatures inden for 15 ft., der kan høre lyden."],
-["Remmen strammer", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Uroligt greb", "Dit næste attack roll inden slutningen af din næste tur får −1."],
-["Hånden i vejen", "Du kan ikke bruge object interaction resten af denne tur."],
-["Løst spænde", "Dit næste Sleight of Hand check inden slutningen af din næste tur har disadvantage."],
-["En mønt falder", "Én mønt lander ved dine fødder, hvis du har en. Ellers ingen ekstra effekt."],
-["Lille genstand løs", "En uvigtig lille genstand fra din oppakning lander ved dine fødder. DM vælger; ingen sådan genstand: ingen ekstra effekt."],
-["Forskudt oppakning", "Din næste bevægelse inden slutningen af din næste tur koster 5 ft. ekstra bevægelse én gang."],
-["Taber grebet", "Én holdt genstand lander ved dine fødder. Fastspændt skjold bliver på armen. Ingen holdt genstand: ingen ekstra effekt."]
-]],
-
-["Forsvar og position", [
-["Holder stillingen", "Ingen ekstra effekt."],
-["Synlig tøven", "Næste attack roll mod dig inden starten af din næste tur får +1."],
-["En åben side", "Den creature, der udløste dit save, får +1 på sit næste attack roll mod dig inden starten af din næste tur. Ingen creature: ingen ekstra effekt."],
-["Urolig parering", "Dit næste melee attack roll inden slutningen af din næste tur får −1."],
-["Forsigtig stilling", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Tilbagelænet", "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."],
-["Giver plads", "Den creature, der udløste dit save, kan bruge sin reaction til straks at bevæge sig 5 ft. uden opportunity attacks. Ingen creature: ingen ekstra effekt."],
-["Kort åbning", "Du får −1 AC indtil starten af din næste tur."],
-["Mister terræn", "Flyt dig 5 ft. væk fra farens kilde til en ledig, sikker plads. Ingen opportunity attacks. Er det umuligt eller kan du ikke bevæge dig, sker intet ekstra."],
-["Ubeskyttet øjeblik", "Næste attack roll mod dig inden starten af din næste tur får +2."]
-]],
-
-["Vilje og fatning", [
-["Trækker vejret", "Ingen ekstra effekt."],
-["Bider tænderne sammen", "Dit næste {ability} check inden slutningen af din næste tur får −1."],
-["Tvivl i stemmen", "Dit næste Persuasion check inden slutningen af din næste tur får −1."],
-["Forceret selvtillid", "Dit næste Intimidation check inden slutningen af din næste tur får −1."],
-["Forstyrrende tanke", "Dit næste {ability} check inden slutningen af din næste tur får −2."],
-["Svært at læse andre", "Dit næste Insight check inden slutningen af din næste tur har disadvantage."],
-["Behov for ro", "Du kan ikke tage Help resten af denne tur."],
-["Tøver med angrebet", "Dit næste attack roll inden slutningen af din næste tur får −1."],
-["Må samle sig", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Tabt fatning", "Dit næste {ability} check inden slutningen af din næste tur har disadvantage. Det påvirker ikke saving throws."]
-]],
-
-["Støj og små uheld", [
-["Et meget lidt heroisk ansigt", "Du ser kortvarigt komisk forskrækket ud. Ingen mekanisk effekt."],
-["Ufrivilligt udråb", "Du udstøder en lyd, der høres 30 ft. væk, hvis magisk stilhed ikke forhindrer det."],
-["Kappen på tværs", "Du må ryste tøjet på plads. Ingen mekanisk effekt."],
-["Højlydt bandeord", "Din placering afsløres for creatures inden for 30 ft., der kan høre dig."],
-["Klaprende tænder", "Dit næste Stealth check inden slutningen af din næste tur får −1."],
-["Hikke af chok", "Dit næste Stealth check inden slutningen af din næste tur får −2."],
-["Forkert kampråb", "Du får sagt noget pinligt. Ingen mekanisk effekt."],
-["Et lille hop", "Du mister 5 ft. af din resterende bevægelse denne tur."],
-["Lyd fra oppakningen", "Dit næste Stealth check inden slutningen af din næste tur har disadvantage."],
-["Dramatisk vaklen", "Du mister 10 ft. af din resterende bevægelse denne tur. Ingen ekstra skade."]
-]]
-]
+  "weapon": [
+    [
+      "Fodfæste og bevægelse",
+      [
+        [
+          "Skoen suger sig fast",
+          "Snavs eller en løs rem holder ved din fod. Din speed reduceres med 5 ft. indtil slutningen af din næste tur; brug en bonus action for at afslutte effekten tidligt."
+        ],
+        [
+          "Knæet protesterer",
+          "Din speed reduceres med 10 ft. indtil slutningen af din næste tur. Bevægelse, du allerede har foretaget, ændres ikke."
+        ],
+        [
+          "To venstrefødder",
+          "Du snubler over din egen stilling og bruger hænderne til at redde balancen. Du kan ikke tage reactions indtil starten af din næste tur."
+        ],
+        [
+          "Knæ i jorden",
+          "Dexterity save DC 10. Ved fejl falder du prone."
+        ],
+        [
+          "Den elegante redning",
+          "Hvis du står op, kan en villig allieret inden for 5 ft. straks bruge sin reaction på at holde dig oppe. Ellers falder du prone. Er du allerede prone, sker intet ekstra."
+        ],
+        [
+          "Rundtosset",
+          "Du kan ikke tage Dash resten af denne tur eller på din næste tur."
+        ],
+        [
+          "Snublende tilbagetog",
+          "Flyt dig 5 ft. væk fra målet til en ledig, sikker plads. Bevægelsen udløser ikke opportunity attacks. Er ingen plads mulig, mister du din reaction indtil starten af din næste tur."
+        ],
+        [
+          "På alle fire",
+          "Du falder prone."
+        ],
+        [
+          "Dårlig landing",
+          "Du falder prone og tager 1d4 bludgeoning damage."
+        ],
+        [
+          "Tæppet under helten",
+          "Du falder prone og får dit tøj eller udstyr filtret sammen. Brug 5 ft. bevægelse ekstra én gang for at rejse dig næste gang; denne ekstra omkostning udløber ved slutningen af din næste tur."
+        ]
+      ]
+    ],
+    [
+      "Greb og udstyr",
+      [
+        [
+          "Den forkerte ende",
+          "Du støder dig på våbnets fæste, skaft eller bagside. Tag 1 bludgeoning damage. Fortæl, hvordan du forsøger at se upåvirket ud."
+        ],
+        [
+          "Du fægtede med skeden",
+          "En rem eller våbenskede vikler sig om våbnet. Brug en bonus action på at frigøre det, før du bruger det igen. Våbnet er ikke beskadiget."
+        ],
+        [
+          "Rem om håndleddet",
+          "Du kan ikke bruge object interaction resten af denne tur."
+        ],
+        [
+          "Den hemmelige samling",
+          "En uvigtig genstand fra din oppakning falder ud, og alle, der kan se den, kan nu se, at du bærer den. Spilleren vælger en faktisk ejet genstand; ingen egnet genstand: ingen ekstra effekt."
+        ],
+        [
+          "Tabt redskab",
+          "Dit våben lander ved dine fødder. Har du intet våben i hånden, mister du din reaction indtil starten af din næste tur."
+        ],
+        [
+          "Slynget væk",
+          "Dit våben lander 5 ft. væk på en sikker, ledig plads. Har du intet i hænderne, får dit næste angreb inden slutningen af din næste tur disadvantage."
+        ],
+        [
+          "Fastklemt",
+          "Dit våben sætter sig fast i dit udstyr. Du kan ikke bruge det, før du bruger en bonus action på at frigøre det. Uden genstand: samme effekt på én hånd."
+        ],
+        [
+          "Rygsæk på afveje",
+          "Din oppakning forskubber sig. Din speed reduceres med 10 ft., indtil du bruger en action på at rette den."
+        ],
+        [
+          "Begge hænder fulde",
+          "Du taber alle holdte genstande ved dine fødder. Fastspændt skjold bliver på armen."
+        ],
+        [
+          "Knude på det hele",
+          "Én hånd sidder fast i en rem. En action fra dig eller en allieret inden for 5 ft. frigør den. Indtil da kan hånden ikke bruges."
+        ]
+      ]
+    ],
+    [
+      "Åbninger og forsvar",
+      [
+        [
+          "Høflig invitation",
+          "Du kommer til at vise modstanderen præcis, hvor din parade er svag. Det oprindelige mål får +1 på sit næste attack roll mod dig inden starten af din næste tur."
+        ],
+        [
+          "For meget selvtillid",
+          "Du peger overlegent på målet og glemmer forsvaret. Det oprindelige mål kan straks bruge sin reaction til at rejse sig, hvis det er prone og har speed over 0. Ellers ingen ekstra effekt."
+        ],
+        [
+          "Tabt timing",
+          "Du kan ikke tage reactions indtil starten af din næste tur."
+        ],
+        [
+          "Forudsigelig",
+          "Det næste attack roll mod dig inden starten af din næste tur har advantage."
+        ],
+        [
+          "Skæv parering",
+          "Du får −1 AC indtil starten af din næste tur."
+        ],
+        [
+          "Blottet forsvar",
+          "Du får −2 AC indtil starten af din næste tur."
+        ],
+        [
+          "Fri passage",
+          "Det oprindelige mål kan straks bruge sin reaction til at bevæge sig op til 10 ft. uden opportunity attacks."
+        ],
+        [
+          "Presset tilbage",
+          "Det oprindelige mål kan bruge sin reaction til at skubbe dig 5 ft. til en ledig, sikker plads. Ingen opportunity attacks."
+        ],
+        [
+          "Modhug",
+          "Det oprindelige mål kan straks bruge sin reaction til ét melee attack mod dig, hvis du er inden for dets reach."
+        ],
+        [
+          "Farlig åbning",
+          "Nærmeste fjende, der kan se og nå dig, kan bruge sin reaction til ét melee attack mod dig med advantage. Ved lighed vælger DM."
+        ]
+      ]
+    ],
+    [
+      "Sigte og fejlangreb",
+      [
+        [
+          "Det var en dyr vase",
+          "Du rammer en skrøbelig, uvigtig genstand i nærheden, hvis en sådan allerede findes. DM vælger. Ingen egnet genstand: en dekorativ del af dit udstyr får en skramme. Ingen magisk genstand eller vigtig ressource ødelægges."
+        ],
+        [
+          "En meget dårlig aflevering",
+          "Du taber våbnet ved dine fødder, men det ser næsten ud som en planlagt manøvre. Det kan samles op normalt. Intet holdt våben: du tager 1 bludgeoning damage fra dit eget fejlslag."
+        ],
+        [
+          "Perfekt snit i luften",
+          "Du rammer præcis dér, hvor målet stod et øjeblik før. Dit næste attack roll mod det samme mål inden slutningen af din næste tur får −2."
+        ],
+        [
+          "Overkorrektion",
+          "Dit næste attack roll inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Vådeskud mod gulvet",
+          "Du tager 1 bludgeoning damage fra et tilbageslag eller en brat bevægelse."
+        ],
+        [
+          "Strejfer dig selv",
+          "Du tager 1d4 damage af angrebets primære skadetype."
+        ],
+        [
+          "Nær ved en ven",
+          "Nærmeste allierede inden for 10 ft. får −2 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."
+        ],
+        [
+          "Uventet mål",
+          "Vælg tilfældigt én anden creature inden for angrebets rækkevidde og synsfelt. Lav et nyt attack roll mod den; ved hit tager den 1d4 af angrebets primære skadetype. Ingen kandidat: ingen ekstra effekt."
+        ],
+        [
+          "Smertefuldt tilbageslag",
+          "Du tager 1d6 damage af angrebets primære skadetype."
+        ],
+        [
+          "Farligt fejlangreb",
+          "Vælg tilfældigt én anden creature inden for angrebets rækkevidde og synsfelt. Lav et nyt attack roll; ved hit tager den 1d6 af angrebets primære skadetype. Ingen kandidat: du tager selv 1d4 af samme type."
+        ]
+      ]
+    ],
+    [
+      "Forstrækning og smerte",
+      [
+        [
+          "Et stik",
+          "Du tager 1 bludgeoning damage."
+        ],
+        [
+          "Albuen møder virkeligheden",
+          "Du rammer din egen albue med et hårdt ryk og taber én holdt genstand ved fødderne. Ingen holdt genstand: dit næste attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Vrid i håndleddet",
+          "Dit næste attack roll inden slutningen af din næste tur får −2."
+        ],
+        [
+          "Krampe med lydeffekt",
+          "Din speed reduceres med 5 ft. indtil slutningen af din næste tur. Et højlydt »av« kan høres 15 ft. væk, hvis du kan tale, og stilhed ikke forhindrer det."
+        ],
+        [
+          "Hård belastning",
+          "Constitution save DC 10. Ved fejl tager du 1d4 bludgeoning damage."
+        ],
+        [
+          "Dårligt knæ",
+          "Constitution save DC 12. Ved fejl halveres din speed indtil slutningen af din næste tur."
+        ],
+        [
+          "Forstrakt arm",
+          "Dit næste attack roll inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Slået luft ud",
+          "Du kan ikke tage reactions indtil slutningen af din næste tur."
+        ],
+        [
+          "Smertefuldt vrid",
+          "Du tager 1d4 bludgeoning damage, og din speed reduceres med 10 ft. indtil slutningen af din næste tur."
+        ],
+        [
+          "Kroppen svigter",
+          "Constitution save DC 12. Ved fejl falder du prone og tager 1d6 bludgeoning damage. Ved succes tager du 1 damage og bliver stående."
+        ]
+      ]
+    ],
+    [
+      "Fokus og nerver",
+      [
+        [
+          "Mors gamle råd",
+          "Du siger et praktisk råd fra din barndom højt på det værst tænkelige tidspunkt. Spilleren finder på rådet. Ingen ekstra straf."
+        ],
+        [
+          "Flakkende blik",
+          "Dit næste Wisdom (Perception) check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Mister overblikket",
+          "Du kan ikke tage Help resten af denne tur eller på din næste tur."
+        ],
+        [
+          "Jeg kender dig da",
+          "Du synes et øjeblik, målet ligner en gammel bekendt. Dit næste angreb mod netop dette mål inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Bifald fra den forkerte",
+          "Du kigger efter anerkendelse hos den forkerte. Du kan ikke bruge Help indtil slutningen af din næste tur."
+        ],
+        [
+          "Fejllæst modstander",
+          "Det oprindelige mål kan straks flytte 5 ft. til en sikker, ledig plads uden opportunity attacks. Det bruger sin reaction."
+        ],
+        [
+          "Mister tråden",
+          "Dit næste attack roll inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Tunnelblik",
+          "Du kan ikke tage reactions indtil starten af din næste tur."
+        ],
+        [
+          "Et øjebliks frygt",
+          "Wisdom save DC 12. Ved fejl er du frightened af det oprindelige mål indtil slutningen af din næste tur. Frygtimmunitet gælder normalt."
+        ],
+        [
+          "Min egen værste rådgiver",
+          "Du retter højlydt på din egen teknik. Det næste attack roll mod dig inden starten af din næste tur får +1, og din placering kan høres 30 ft. væk, hvis lyd er mulig."
+        ]
+      ]
+    ],
+    [
+      "Omgivelser og støj",
+      [
+        [
+          "Rungende brag",
+          "Et bump eller råb høres 60 ft. væk, medmindre magisk stilhed forhindrer det. Ingen ekstra effekt."
+        ],
+        [
+          "Gammelt støv, ny fjende",
+          "Støv fra dit eget tøj får dig til at nyse. Dit næste angreb inden slutningen af din næste tur får −1, medmindre du bruger en bonus action på at få styr på nyset."
+        ],
+        [
+          "Den uventede genvej",
+          "Du rammer en løs rem med foden. Din speed reduceres med 5 ft. indtil slutningen af din næste tur. Du kan afslutte effekten med en bonus action."
+        ],
+        [
+          "Bagage mod baghoved",
+          "Din egen oppakning eller beklædning slår imod dig. Du tager 1 bludgeoning damage og bliver kortvarigt meget fornærmet på dit udstyr."
+        ],
+        [
+          "Hjelmen på næsen",
+          "Hjelm, hætte eller hår glider foran øjnene. Dit næste attack roll inden slutningen af din næste tur har disadvantage, medmindre du bruger en bonus action på at rette det. Effekten udløber derefter."
+        ],
+        [
+          "Dårligt underlag",
+          "Dexterity save DC 12. Ved fejl falder du prone."
+        ],
+        [
+          "Hænger fast i kanten",
+          "Din speed bliver 0, indtil du eller en allieret inden for 5 ft. bruger en bonus action på at frigøre dig."
+        ],
+        [
+          "Albue mod væggen",
+          "Du tager 1d4 bludgeoning damage. På åben grund støder du i stedet dit eget udstyr."
+        ],
+        [
+          "Støv i øjnene",
+          "Dit næste attack roll inden slutningen af din næste tur har disadvantage. Ingen egnet overflade: sved giver samme effekt."
+        ],
+        [
+          "Uheldigt sammenstød",
+          "Du falder prone og taber én holdt genstand ved dine fødder. Har du ingen genstand, tager du i stedet 1d4 bludgeoning damage."
+        ]
+      ]
+    ],
+    [
+      "Heltemod og komiske katastrofer",
+      [
+        [
+          "Den tabte støvle",
+          "Din støvle eller en anden løs beklædningsdel flyver 5 ft. væk til en sikker plads. Ingen mekanisk straf; husk den efter kampen. Har du intet løst tøj, får du i stedet et voldsomt hikkeanfald i 1d4 runder, uden mekanisk effekt."
+        ],
+        [
+          "Forkert kampråb",
+          "Du råber navnet på en kroret eller en gammel flamme i stedet for dit kampråb. Spilleren vælger ordene. Ingen ekstra straf."
+        ],
+        [
+          "Bæltesvigt",
+          "Bæltet løsner sig, og oppakningen glider. Vælg: tab én holdt genstand ved fødderne, eller få disadvantage på dit næste attack roll inden slutningen af din næste tur. Ingen holdt genstand: vælg disadvantage. Du kan samle en tabt genstand op normalt."
+        ],
+        [
+          "Jeg mente at gøre det",
+          "Dit miss ender i en overdrevent elegant bukken. Du kan vælge straks at bruge din reaction på at rette dig op; ellers får næste attack roll mod dig inden starten af din næste tur +1."
+        ],
+        [
+          "Værdigheden først",
+          "Du opdager en flænge i tøjet på et pinligt sted. Du vælger selv, hvad du udbrød. Dit næste Intimidation check inden for 1 minut har disadvantage; ingen anden straf."
+        ],
+        [
+          "En flue i kampråbet",
+          "Du får noget støv eller et lille insekt i munden. Indtil starten af din næste tur kan du ikke foretage opportunity attacks, mens du hoster. Du kan stadig tale og caste spells normalt."
+        ],
+        [
+          "Ration på afveje",
+          "En ration eller uvigtig lille genstand fra din oppakning lander 5 ft. væk på en sikker plads. DM vælger noget, du faktisk har. Ingen egnet genstand: dit kampråb bliver i stedet afbrudt af en høj bøvs, uden ekstra straf."
+        ],
+        [
+          "Den heroiske maveplasker",
+          "Du falder prone med et uheroisk grynt. Ingen ekstra skade."
+        ],
+        [
+          "Det pinlige kælenavn",
+          "Du råber spontant et kælenavn på dig selv. Spilleren finder på det. De nærmeste, der kan høre dig, kender nu navnet; ingen magisk eller tvungen reaktion fra dem."
+        ],
+        [
+          "Stående bifald, nogen?",
+          "Du afslutter dit fejlslag med en dramatisk positur og kommer til at spørge: »Så I det?« Du kan ikke tage reactions indtil starten af din næste tur."
+        ]
+      ]
+    ]
+  ],
+  "magic": [
+    [
+      "Kontrol over magien",
+      [
+        [
+          "Ustabil gnist",
+          "En gnist slipper løs. Ingen ekstra effekt."
+        ],
+        [
+          "For tidlig applaus",
+          "En illusorisk hånd klapper én gang ved din plads, selv om besværgelsen misser. Lyden kan høres 30 ft. væk, medmindre stilhed forhindrer det."
+        ],
+        [
+          "Besværgelsen får hikke",
+          "Små lysgnister i din mund afbryder din dramatiske fremtoning i 1 minut. Dit næste Intimidation check i denne tid har disadvantage. Du kan stadig caste normalt."
+        ],
+        [
+          "Bølgende kraft",
+          "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Glemt kunstnernavn",
+          "Du afslutter formlen med et forkert, højtideligt navn på dig selv. Spilleren vælger navnet. Ingen ekstra mekanisk effekt."
+        ],
+        [
+          "Brudt rytme",
+          "Du kan ikke tage reactions indtil starten af din næste tur."
+        ],
+        [
+          "Overkorrektion",
+          "Dit næste spell attack inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Gnister i støvlen",
+          "Din speed reduceres med 10 ft. indtil slutningen af din næste tur. Du kan afslutte effekten tidligt med en bonus action for at ryste støvlen."
+        ],
+        [
+          "Magisk konfetti",
+          "Ufarlig konfetti vælter ud af din hånd. Den forsvinder efter 1 minut og kan ikke blokere syn, skabe cover eller bruges som genstande. Dit næste Stealth check i denne tid har disadvantage."
+        ],
+        [
+          "Magisk hikke",
+          "Dit næste spell attack inden slutningen af din næste tur har disadvantage, og du kan ikke tage reactions indtil starten af din næste tur."
+        ]
+      ]
+    ],
+    [
+      "Magisk tilbageslag",
+      [
+        [
+          "Statisk prikken",
+          "Du mærker en ufarlig sitren. Ingen ekstra effekt."
+        ],
+        [
+          "Lille stød",
+          "Du tager 1 force damage."
+        ],
+        [
+          "Troldmandens stegepande",
+          "Dit hår eller dit tøj damper med duft af brændt toast i 1 minut. Du tager 1 fire damage. Intet antændes."
+        ],
+        [
+          "Iskold iling",
+          "Du tager 1 cold damage."
+        ],
+        [
+          "Den store lille tromme",
+          "Du tager 1 thunder damage. Et komisk trommeslag fra din plads kan høres 30 ft. væk, hvis magisk stilhed ikke forhindrer det."
+        ],
+        [
+          "Elektrisk smæld",
+          "Du tager 1 lightning damage."
+        ],
+        [
+          "Kraft i håndleddet",
+          "Du tager 1d4 force damage."
+        ],
+        [
+          "Smerte bag øjnene",
+          "Du tager 1d4 psychic damage."
+        ],
+        [
+          "Statisk frisure",
+          "Du tager 1d4 force damage. Dit hår, skæg eller løse tøj står strittende i 1 minut. Det giver ingen yderligere mekanisk straf."
+        ],
+        [
+          "Kraftigt tilbageslag",
+          "Du tager 1d6 force damage. Ingen anden ekstra effekt."
+        ]
+      ]
+    ],
+    [
+      "Fokus og gestik",
+      [
+        [
+          "Forkert finger",
+          "En gestus bliver pinlig. Ingen ekstra effekt."
+        ],
+        [
+          "En høne af en gestus",
+          "Din tryllebevægelse ligner kortvarigt en høne, der basker. Dit næste spell attack inden slutningen af din næste tur får −1, medmindre du bruger en bonus action på at rette grebet."
+        ],
+        [
+          "Komponentlommen protesterer",
+          "En uvigtig, ikke-forbrugt komponent springer ud af lommen, hvis du har sådan en. Den lander ved fødderne og kan samles op normalt. Ellers er det blot en løs tråd; ingen ekstra straf."
+        ],
+        [
+          "Komponenter rasler",
+          "Din placering afsløres for creatures inden for 30 ft., der kan høre lyden."
+        ],
+        [
+          "Fokus glider",
+          "Én holdt genstand lander ved dine fødder. Uden holdt genstand mister du din reaction indtil starten af din næste tur."
+        ],
+        [
+          "Rem i fingrene",
+          "Én hånd hænger fast i dit udstyr. Brug en bonus action på at frigøre den; indtil da kan hånden ikke bruges."
+        ],
+        [
+          "Forceret gestus",
+          "Dit næste spell attack inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Forvirrede komponenter",
+          "Din component pouch eller dit fokus kan ikke bruges, før du bruger en bonus action på at ordne det. Bruger du ingen af delene, gælder det i stedet én hånd."
+        ],
+        [
+          "Fokus på afveje",
+          "Én holdt genstand lander på en sikker plads 5 ft. væk. Har du ingen, falder du prone."
+        ],
+        [
+          "Begge hænder svigter",
+          "Du taber alle holdte genstande ved dine fødder. Fastspændt skjold bliver på armen."
+        ]
+      ]
+    ],
+    [
+      "Sanser og magiske ekkoer",
+      [
+        [
+          "Forkert publikum",
+          "Du ser et illusorisk publikum ryste på hovedet. Kun du ser det; det forsvinder efter få sekunder og giver ingen mekanisk straf."
+        ],
+        [
+          "Brummen i ørerne",
+          "Dit næste hørebaserede Perception check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Flimmer i blikket",
+          "Dit næste synsbaserede Perception check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Lille stjerne, stor ambition",
+          "En ufarlig lysprik kredser om dit hoved i 1 minut. Den er synlig men afgiver ikke lys og ophæver ikke usynlighed. Ingen ekstra mekanisk effekt."
+        ],
+        [
+          "Runer med stavefejl",
+          "Illusoriske runer omkring dig staver dit navn forkert i 1 minut. De skaber ikke lys eller cover. Dit næste Intimidation check i denne tid får −2."
+        ],
+        [
+          "Egen stemme runger",
+          "Dit næste Intelligence check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Forkert afstand",
+          "Dit næste spell attack mod det oprindelige mål inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Overvældende sanser",
+          "Du kan ikke tage reactions indtil starten af din næste tur."
+        ],
+        [
+          "Dobbeltbillede",
+          "Dit næste spell attack inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Et smertefuldt ekko",
+          "Du tager 1 psychic damage, og dit næste spell attack inden slutningen af din næste tur har disadvantage."
+        ]
+      ]
+    ],
+    [
+      "Rum og fodfæste",
+      [
+        [
+          "Kappen løfter sig",
+          "En ufarlig vindpust griber dit tøj. Ingen ekstra effekt."
+        ],
+        [
+          "Kolde tæer",
+          "Din speed reduceres med 5 ft. indtil slutningen af din næste tur. Støvler eller fødder ser rimdækkede ud; rimen forsvinder, når effekten slutter."
+        ],
+        [
+          "Usynlig snørebåndsknude",
+          "Din speed reduceres med 10 ft. indtil slutningen af din næste tur. En bonus action til at ryste fødderne afslutter effekten tidligt."
+        ],
+        [
+          "Hænderne fulde af ingenting",
+          "En illusorisk knude opstår mellem hænderne. Du kan ikke bruge object interaction indtil slutningen af din næste tur, medmindre du bruger en bonus action på at vifte den væk. Den hindrer ikke spellcasting."
+        ],
+        [
+          "Usikker landing",
+          "Dexterity save DC 10. Ved fejl falder du prone."
+        ],
+        [
+          "Et højst uventet dansetrin",
+          "Flyt dig 5 ft. til en ledig, sikker plads efter eget valg uden opportunity attacks. Du kan ikke tage reactions indtil starten af din næste tur. Kan du ikke bevæge dig sikkert, gælder kun reaction-straffen."
+        ],
+        [
+          "Energi i benene",
+          "Du kan ikke tage Dash resten af denne tur eller på din næste tur."
+        ],
+        [
+          "Knæene giver efter",
+          "Du falder prone."
+        ],
+        [
+          "Hårdt mod gulvet",
+          "Du falder prone og tager 1 bludgeoning damage."
+        ],
+        [
+          "Den store finale",
+          "Du falder prone, og en lille illusorisk sky markerer landingen. Skyen blokerer intet og forsvinder straks. Du tager ingen ekstra skade."
+        ]
+      ]
+    ],
+    [
+      "Vildfarende energi",
+      [
+        [
+          "Ud i ingenting",
+          "Restenergien forsvinder. Ingen ekstra effekt."
+        ],
+        [
+          "Ufarligt lysspor",
+          "Et glødende spor afslører din placering for creatures, der kan se dig. Ingen ekstra skade."
+        ],
+        [
+          "Skarpt smæld",
+          "Et smæld høres 60 ft. væk, medmindre magisk stilhed forhindrer det."
+        ],
+        [
+          "Pil med forkert adresse",
+          "Et illusorisk vejskilt ved din hånd peger væk fra målet i 1 minut og siger »DEN ANDEN VEJ«. Det ændrer ikke din viden om retninger eller angrebsregler."
+        ],
+        [
+          "Skræmt allieret",
+          "Nærmeste allierede inden for 10 ft. får −1 på sit næste attack roll inden slutningen af sin næste tur. Ingen allieret: du får selv straffen."
+        ],
+        [
+          "Gnister på huden",
+          "Du tager 1 damage af typen {damage}."
+        ],
+        [
+          "Vildfaren gnist",
+          "Vælg tilfældigt en anden creature inden for 10 ft. af det oprindelige mål og inden for spellens rækkevidde og dit synsfelt. Nyt spell attack; ved hit tager den 1d4 damage af typen {damage}. Ingen kandidat: ingen ekstra effekt."
+        ],
+        [
+          "Glitter i selskabet",
+          "Du og en villig allieret inden for 10 ft. dækkes af illusorisk glitter i 1 minut. Ingen allieret vil være med: kun dig. Dit næste Stealth check i denne tid har disadvantage; andres slag påvirkes ikke."
+        ],
+        [
+          "Magisk rekyl",
+          "Du tager 1d4 damage af typen {damage}."
+        ],
+        [
+          "Farligt energispor",
+          "Vælg tilfældigt en anden creature inden for 10 ft. af det oprindelige mål og inden for spellens rækkevidde og dit synsfelt. Nyt spell attack; ved hit tager den 1d6 damage af typen {damage}. Ingen kandidat: du tager selv 1 damage af samme type."
+        ]
+      ]
+    ],
+    [
+      "Nerver og åbninger",
+      [
+        [
+          "Højtidelig pause",
+          "Din dramatiske stilhed falder til jorden. Ingen ekstra effekt."
+        ],
+        [
+          "Den lidt for ærlige formular",
+          "Et tydeligt magisk ekko fra din plads siger »det plejer at virke«. Det kan høres 30 ft. væk, medmindre stilhed forhindrer det. Ingen ekstra mekanisk straf."
+        ],
+        [
+          "Blottet side",
+          "Det oprindelige mål får +2 på sit næste attack roll mod dig inden starten af din næste tur."
+        ],
+        [
+          "Ubeskyttet gestus",
+          "Du får −1 AC indtil starten af din næste tur."
+        ],
+        [
+          "Mistet timing",
+          "Du kan ikke tage reactions indtil starten af din næste tur."
+        ],
+        [
+          "Plads til flugt",
+          "Det oprindelige mål kan bruge sin reaction til straks at bevæge sig op til 10 ft. uden opportunity attacks."
+        ],
+        [
+          "Råd fra et lysglimt",
+          "En illusorisk pil peger hjælpsomt på dit eget fokus eller din hånd og forsvinder efter 1 minut. Den giver ingen mekanisk effekt, men det er svært at se erfaren ud."
+        ],
+        [
+          "Åben invitation",
+          "Det næste attack roll mod dig inden starten af din næste tur har advantage."
+        ],
+        [
+          "Dårlig forsvarsstilling",
+          "Du får −2 AC indtil starten af din næste tur."
+        ],
+        [
+          "Modstanderens øjeblik",
+          "Det oprindelige mål kan straks bruge sin reaction til ét melee attack mod dig, hvis du er inden for dets reach."
+        ]
+      ]
+    ],
+    [
+      "Magiske absurditeter",
+      [
+        [
+          "Den kritiske kommentator",
+          "Et ufarligt miniatureansigt svæver ved din skulder i 1 minut. Efter dine næste to attack rolls kommenterer det din teknik med en tør bemærkning. Det kan ikke angribe, spejde eller påvirke slag."
+        ],
+        [
+          "Troldmandens boblebad",
+          "Dine ord ledsages af sæbebobler i 1 minut. De afslører, hvem der taler, for dem der kan se boblerne. De ændrer ikke spell components eller evnen til at caste."
+        ],
+        [
+          "Højt og helligt",
+          "Din stemme lyder som en overivrig markedsråber i 1d4 runder. Når du taler, har du disadvantage på Stealth-checks for at skjule lyden. Du kan stadig hviske og caste normalt."
+        ],
+        [
+          "Øjenbryn med ambitioner",
+          "Dine øjenbryn, eller to lysende streger over øjnene, stråler i 1 minut. Du afgiver dim light i 5 ft. Dette er ikke en spell, og det forhindrer ikke usynlighed, men lyset kan afsløre din placering."
+        ],
+        [
+          "Duft af nederlag",
+          "Du lugter kraftigt af ristet løg, våd hund eller nybagt brød i 1d4 minutter; slå 1d3. Lugten kan bemærkes inden for 10 ft., men giver ingen bonus til tracking og ophæver ikke usynlighed."
+        ],
+        [
+          "Trylleformularens kvittering",
+          "En illusorisk papirstrimmel viser »BESVÆRGELSE AFVIST« over dit hoved i 1 minut. Den kan læses af dem, der forstår dit sprog, men skaber hverken lys, cover eller andre mekaniske effekter."
+        ],
+        [
+          "Forsinket fanfare",
+          "Ved starten af din næste tur lyder en falsk trompetfanfare fra din plads. Den høres 30 ft. væk, medmindre magisk stilhed forhindrer det, og kan afsløre din placering."
+        ],
+        [
+          "Den utilfredse hat",
+          "Dit hovedtøj, eller et illusorisk hovedtøj hvis du intet bærer, drejer sig langsomt rundt i 1 minut. Det hindrer ikke syn, spells eller bevægelse."
+        ],
+        [
+          "Svævende overskæg",
+          "Et stort illusorisk overskæg opstår 5 ft. foran dit ansigt og følger dig i 1 minut. Det er synligt, men kan ikke blokere syn eller angreb, spejde eller bruges som genstand."
+        ],
+        [
+          "Bed om en anmeldelse",
+          "En stemme fra din plads spørger: »På en skala fra ét til ti: Hvordan oplevede De besværgelsen?« Den høres 30 ft. væk, medmindre magisk stilhed forhindrer det. Ingen er tvunget til at svare."
+        ]
+      ]
+    ]
+  ],
+  "save": [
+    [
+      "Efterreaktion",
+      [
+        [
+          "Et øjebliks rystelse",
+          "Ingen ekstra mekanisk effekt."
+        ],
+        [
+          "Det afslørende efterspil",
+          "Din krop eller mine afslører et øjebliks panik. Dit næste {ability} check inden slutningen af din næste tur får −1. Det påvirker ikke saves."
+        ],
+        [
+          "Den fastklemte rem",
+          "Din speed reduceres med 5 ft. indtil slutningen af din næste tur. Hvis du kan handle, kan du afslutte effekten tidligt med en bonus action."
+        ],
+        [
+          "Svært ved at samle sig",
+          "Dit næste {ability} check inden slutningen af din næste tur får −2."
+        ],
+        [
+          "Ustabil rytme",
+          "Dit næste attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Forstyrret overblik",
+          "Dit næste Perception check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Forsinket reaktion",
+          "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."
+        ],
+        [
+          "Rystet koncentrationsevne",
+          "Dit næste {ability} check inden slutningen af din næste tur har disadvantage. Dette påvirker ikke saving throws eller concentration saves."
+        ],
+        [
+          "Det var ikke et skrig",
+          "Dit forskrækkede udbrud kan høres 30 ft. væk, hvis du kan frembringe lyd, og magisk stilhed ikke forhindrer det. Du vælger selv din efterfølgende undskyldning."
+        ],
+        [
+          "Et øjeblik uden forsvar",
+          "Det næste attack roll mod dig inden starten af din næste tur får +1."
+        ]
+      ]
+    ],
+    [
+      "Fodfæste",
+      [
+        [
+          "Står stadig",
+          "Ingen ekstra effekt."
+        ],
+        [
+          "Usikre fødder",
+          "Din speed reduceres med 5 ft. indtil slutningen af din næste tur. Allerede foretaget bevægelse ændres ikke."
+        ],
+        [
+          "Skæv vægtfordeling",
+          "Din næste bevægelse inden slutningen af din næste tur koster 5 ft. ekstra bevægelse én gang."
+        ],
+        [
+          "Vaklende stilling",
+          "Dit næste Dexterity (Acrobatics) check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Hænderne skal også være med",
+          "Du fægter med hænderne for at finde ro. Du kan ikke bruge object interaction indtil starten af din næste tur."
+        ],
+        [
+          "Bælte, bliv her",
+          "Din oppakning glider. Vælg at lade én uvigtig lille genstand falde ved fødderne eller få −1 på dit næste attack roll inden slutningen af din næste tur. Ingen egnet genstand: vælg angrebsstraffen."
+        ],
+        [
+          "Usikkert knæ",
+          "Dit næste Dexterity (Acrobatics) check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Må finde balancen",
+          "Din næste bevægelse inden slutningen af din næste tur koster 10 ft. ekstra bevægelse én gang."
+        ],
+        [
+          "Et knæ i værdigheden",
+          "Din speed reduceres med 5 ft. indtil slutningen af din næste tur, mens du får styr på stillingen. Du bliver ikke prone."
+        ],
+        [
+          "Fald på knæ",
+          "Du falder prone. Hvis grundeffekten allerede gør dig prone, sker der intet ekstra."
+        ]
+      ]
+    ],
+    [
+      "Sanser og overblik",
+      [
+        [
+          "Et kort glimt",
+          "Ingen ekstra effekt."
+        ],
+        [
+          "Flakkende opmærksomhed",
+          "Dit næste Perception check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Fokus på faren",
+          "Dit næste Investigation check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Sløret overblik",
+          "Dit næste Perception check inden slutningen af din næste tur får −2."
+        ],
+        [
+          "Tvivl om afstand",
+          "Dit næste ranged attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Mange indtryk",
+          "Dit næste {ability} check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Et øjebliks tunnelsyn",
+          "Du kan ikke bruge Help til et ability check indtil slutningen af din næste tur."
+        ],
+        [
+          "Forstyrret sansning",
+          "Dit næste Perception check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Mister en detalje",
+          "Dit næste Investigation check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Usikkert sigte",
+          "Dit næste attack roll inden slutningen af din næste tur får −1."
+        ]
+      ]
+    ],
+    [
+      "Timing og reaktion",
+      [
+        [
+          "Indhenter rytmen",
+          "Ingen ekstra effekt."
+        ],
+        [
+          "Kroppen er en smule bagud",
+          "Din speed reduceres med 5 ft. indtil slutningen af din næste tur. Tidligere bevægelse ændres ikke."
+        ],
+        [
+          "Forsinket protest",
+          "Ved starten af din næste tur kommer et forsinket »av!« eller grynt, hvis du kan frembringe lyd. Det kan høres 15 ft. væk, medmindre stilhed forhindrer det."
+        ],
+        [
+          "Tabt lille øjeblik",
+          "Du kan ikke bruge object interaction resten af denne tur."
+        ],
+        [
+          "Forpasset åbning",
+          "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."
+        ],
+        [
+          "Den misforståede kommando",
+          "Hvis du kan tale, får du sagt »vent!« til nærmeste genstand. Ingen er tvunget til at reagere. Ingen ekstra mekanisk effekt."
+        ],
+        [
+          "Urolig rytme",
+          "Dit næste attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Dårlig koordinering",
+          "Dit næste {ability} check inden slutningen af din næste tur får −2."
+        ],
+        [
+          "Nu kommer efterreaktionen",
+          "Dit næste {ability} check inden slutningen af din næste tur får −1. Du har en kort, tydeligt forsinket reaktion; det påvirker ikke saving throws."
+        ],
+        [
+          "Reaktionen udebliver",
+          "Du kan ikke tage reactions indtil starten af din næste tur."
+        ]
+      ]
+    ],
+    [
+      "Greb og oppakning",
+      [
+        [
+          "Intet løsner sig",
+          "Ingen ekstra effekt."
+        ],
+        [
+          "Raslen fra udstyret",
+          "Din placering afsløres for creatures inden for 15 ft., der kan høre lyden."
+        ],
+        [
+          "Remmen har en mening",
+          "Din oppakning sætter sig skævt. Din speed reduceres med 5 ft. indtil slutningen af din næste tur. En bonus action retter den og afslutter effekten tidligt."
+        ],
+        [
+          "Uroligt greb",
+          "Dit næste attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Hånden i vejen",
+          "Du kan ikke bruge object interaction resten af denne tur."
+        ],
+        [
+          "Løst spænde",
+          "Dit næste Sleight of Hand check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "En mønt falder",
+          "Én mønt lander ved dine fødder, hvis du har en. Ellers ingen ekstra effekt."
+        ],
+        [
+          "Lille genstand løs",
+          "En uvigtig lille genstand fra din oppakning lander ved dine fødder. DM vælger; ingen sådan genstand: ingen ekstra effekt."
+        ],
+        [
+          "Forskudt oppakning",
+          "Din næste bevægelse inden slutningen af din næste tur koster 5 ft. ekstra bevægelse én gang."
+        ],
+        [
+          "Taber grebet",
+          "Én holdt genstand lander ved dine fødder. Fastspændt skjold bliver på armen. Ingen holdt genstand: ingen ekstra effekt."
+        ]
+      ]
+    ],
+    [
+      "Forsvar og position",
+      [
+        [
+          "Holder stillingen",
+          "Ingen ekstra effekt."
+        ],
+        [
+          "Synlig tøven",
+          "Næste attack roll mod dig inden starten af din næste tur får +1."
+        ],
+        [
+          "En åben side",
+          "Den creature, der udløste dit save, får +1 på sit næste attack roll mod dig inden starten af din næste tur. Ingen creature: ingen ekstra effekt."
+        ],
+        [
+          "Urolig parering",
+          "Dit næste melee attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Stærkt uenig i fysikken",
+          "Du ser personligt fornærmet ud over situationen. Dit næste Intimidation check inden for 1 minut får −1. Ingen ekstra kampeffekt."
+        ],
+        [
+          "Tilbagelænet",
+          "Du kan ikke foretage opportunity attacks indtil starten af din næste tur."
+        ],
+        [
+          "Giver plads",
+          "Den creature, der udløste dit save, kan bruge sin reaction til straks at bevæge sig 5 ft. uden opportunity attacks. Ingen creature: ingen ekstra effekt."
+        ],
+        [
+          "Kort åbning",
+          "Du får −1 AC indtil starten af din næste tur."
+        ],
+        [
+          "Mister terræn",
+          "Flyt dig 5 ft. væk fra farens kilde til en ledig, sikker plads. Ingen opportunity attacks. Er det umuligt eller kan du ikke bevæge dig, sker intet ekstra."
+        ],
+        [
+          "Ubeskyttet øjeblik",
+          "Næste attack roll mod dig inden starten af din næste tur får +2."
+        ]
+      ]
+    ],
+    [
+      "Vilje og fatning",
+      [
+        [
+          "Trækker vejret",
+          "Ingen ekstra effekt."
+        ],
+        [
+          "Bider tænderne sammen",
+          "Dit næste {ability} check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Tvivl i stemmen",
+          "Dit næste Persuasion check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Forceret selvtillid",
+          "Dit næste Intimidation check inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Forstyrrende tanke",
+          "Dit næste {ability} check inden slutningen af din næste tur får −2."
+        ],
+        [
+          "Svært at læse andre",
+          "Dit næste Insight check inden slutningen af din næste tur har disadvantage."
+        ],
+        [
+          "Behov for ro",
+          "Du kan ikke tage Help resten af denne tur."
+        ],
+        [
+          "Tøver med angrebet",
+          "Dit næste attack roll inden slutningen af din næste tur får −1."
+        ],
+        [
+          "Et øjebliks selvsnak",
+          "Du mumler din egen peptalk, hvis du kan tale. Den kan høres 15 ft. væk, medmindre stilhed forhindrer det. Spilleren vælger ordene; ingen anden ekstra effekt."
+        ],
+        [
+          "Tabt fatning",
+          "Dit næste {ability} check inden slutningen af din næste tur har disadvantage. Det påvirker ikke saving throws."
+        ]
+      ]
+    ],
+    [
+      "Pinlige efterreaktioner",
+      [
+        [
+          "Professionel benægtelse",
+          "Du udbryder: »Jeg har fuldstændig styr på det!« Det kan høres 30 ft. væk, hvis du kan tale, og magisk stilhed ikke forhindrer det. Grundeffekten fra dit save gælder stadig."
+        ],
+        [
+          "Et meget personligt minde",
+          "Et pinligt minde trænger sig på. Spilleren vælger et navn, figuren mumler. Kan du ikke tale, ser du blot flov ud. Ingen ekstra mekanisk effekt."
+        ],
+        [
+          "Nødproviant tager flugten",
+          "En ration eller uvigtig lille genstand falder ud af din oppakning og lander ved dine fødder. DM vælger noget, du har. Ingen egnet genstand: ingen ekstra effekt."
+        ],
+        [
+          "Den fornærmede værdighed",
+          "Du retter febrilsk på tøjet og kigger, om nogen så det. Dit næste Intimidation check inden for 1 minut har disadvantage. Ingen ekstra kampeffekt."
+        ],
+        [
+          "Forkert person at takke",
+          "Du takker spontant farens kilde for »hjælpen«. Kun hvis du kan tale; ingen er tvunget til at reagere, og det ændrer ikke fjendskab eller grundeffekten."
+        ],
+        [
+          "Den heroiske lyd",
+          "Du udstøder et lille piv, grynt eller en overrasket hikke. Spilleren vælger lyden. Den kan høres 15 ft. væk, hvis grundeffekt og stilhed tillader det."
+        ],
+        [
+          "Panik med manerer",
+          "Du får sagt »undskyld« til nærmeste væsen eller genstand. Hvis du ikke kan tale, laver du i stedet et undskyldende ansigtsudtryk. Ingen ekstra straf."
+        ],
+        [
+          "Det afslørende spørgsmål",
+          "Du kommer til at spørge: »Er det normalt, at det gør sådan?« Lyden kan høres 30 ft. væk, hvis du kan tale, og magisk stilhed ikke forhindrer det."
+        ],
+        [
+          "Sammenbidt smileforsøg",
+          "Du prøver at se sej ud, men ansigtet samarbejder ikke. Dit næste Deception check inden for 1 minut for at skjule ubehag har disadvantage."
+        ],
+        [
+          "Bevar roen, alle sammen",
+          "Du forsøger at berolige andre med en stemme, der tydeligt afslører din egen uro. Hvis du kan tale, høres det 30 ft. væk, medmindre stilhed forhindrer det. Ingen tvungen reaktion fra andre."
+        ]
+      ]
+    ]
+  ]
 };
 
 const $ = id => document.getElementById(id);
@@ -774,6 +1552,15 @@ const UNARMED = {
     "Du falder prone og tager 1 bludgeoning damage."
   ]
 };
+
+Object.assign(UNARMED, {
+  "Den forkerte ende": ["Panden møder knæet", "Du støder en kropsdel mod en anden i dit fejlslag. Tag 1 bludgeoning damage. Beskriv, hvordan du forsøger at se upåvirket ud."],
+  "Du fægtede med skeden": ["Fingrene filtres", "Én hånd eller ét angrebslem hænger fast i dit eget greb eller stilling. Brug en bonus action på at frigøre det, før det kan bruges igen."],
+  "En meget dårlig aflevering": ["En meget dårlig klapsalve", "Dine hænder eller angrebslemmer møder hinanden i stedet for målet. Tag 1 bludgeoning damage."],
+  "Hjelmen på næsen": ["Noget i øjnene", "Hår, sved eller støv kommer i øjnene. Dit næste attack roll inden slutningen af din næste tur har disadvantage, medmindre du bruger en bonus action på at tørre ansigtet."],
+  "Bæltesvigt": ["Stillingen svigter", "Vælg: fald prone eller få disadvantage på dit næste attack roll inden slutningen af din næste tur."],
+  "Den tabte støvle": ["Et uheroisk klik", "Et led eller din kæbe giver et tydeligt klik. Du ser overrasket på din egen krop; ingen ekstra mekanisk effekt."]
+});
 
 let category = "weapon";
 
